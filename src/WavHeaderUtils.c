@@ -13,13 +13,13 @@ void parse(struct WAV_HEADER *header){
     printf("(41-44) Size of data chunk: %u \n", header->data_size);
 }
 
-void loadImg(){
+void loadImg(int length){
     FILE *fileptr = fopen("outfile.wav", "rb");  // Open the file in binary mode
     if(fileptr == NULL){
         printf("fileptr is NULL \n");
         return;
     }
-    FILE * outfile = fopen("imgfile.bmp", "wb");
+    FILE * outfile = fopen("imgfile.png", "wb");
     if(outfile == NULL){
         printf("out is NULL \n");
         return;
@@ -41,9 +41,12 @@ void loadImg(){
     unsigned char img_buffer[1];
     int index = 0;
     unsigned char bit = 0x00;
+    int total_length = 0;
     img_buffer[0] = 0;
-    while((read = fread(buffer, 1, sample_size, fileptr)) > 0)
+    //printf('total: %u', length);
+    while(((read = fread(buffer, 1, sample_size, fileptr)) > 0) && total_length <= length)
     {
+        total_length += sample_size;
         if (index==7) {
             index = 0;
             //img_buffer[1] = bit;
@@ -66,6 +69,7 @@ void loadImg(){
     fclose(outfile);
 }
 
+
 int main(){
 
     FILE *fileptr = fopen("sample1.wav", "rb");  // Open the file in binary mode
@@ -74,12 +78,13 @@ int main(){
         return 0;
     }
     
-    FILE *img = fopen("Alfred.bmp", "rb");
+    FILE *img = fopen("prueba.png", "rb");
     if(img == NULL){
         printf("img is NULL \n");
         return 0;
     }
     
+    //archivo de audio resuktante que deberia ser igual al original
     FILE * outfile = fopen("outfile.wav", "wb");
     if(outfile == NULL){
         printf("out is NULL \n");
@@ -87,6 +92,7 @@ int main(){
     }
     int write = 0;
     
+    //primero leo el header: 44B
     struct WAV_HEADER header;
     memset(&header, 0, sizeof(header));
     int read = fread(&header,sizeof(header),1,fileptr);
@@ -103,31 +109,38 @@ int main(){
     read = 0;
     int img_read = 0;
     unsigned short int sample_size = header.bits_per_sample / 8;
-    unsigned char buffer[sample_size];
+    unsigned char *buffer = (unsigned char *)malloc(sample_size);
     unsigned char img_buffer[1];
     unsigned char bit;
     int index = 0;
+    //leo el primer B de la imagen
     img_read = fread(img_buffer, 1, 1, img);
     
+    //leo un sample a la vez
+    long int total_length = 0;
     while((read = fread(buffer, 1, sample_size, fileptr)) > 0)
     {
-        if (index>=8) {
+        total_length++;
+        //printf("%u %u", *buffer, *(buffer+sample_size-1));
+        if (index>=8) { //si ya lei todo un byte agarro el que sigue
             index = 0;
             img_read = fread(img_buffer, 1, 1, img);
         }
         if (img_read > 0) {
-            
-            bit = img_read & (1<<(index));
+            //printf("%u %u", *buffer, *(buffer+sample_size-1));
+            //agarro el bit index
+            bit = (*img_buffer) & (1<<(index));
             index++;
             
-            if (((bit & 0x01) == 1) && ((read % 2) == 0)) {
-                buffer[sample_size-1]= buffer[sample_size-1] + 0x01;
+            //cambio el ultimo bit del buffer de lectura
+            if (((bit & 0x01) == 1) && (((*(buffer+sample_size-1))  & 0x01 ) == 0)) {
+                (*(buffer+sample_size-1))= (*(buffer+sample_size-1)) | 0x01;
                 //printf("changed to 1");
-            }else if (((bit & 0x01) == 0) && ((read % 2) == 1)) {
-                buffer[sample_size-1] = buffer[sample_size-1] - 0x01;
+            }else if (((bit & 0x01) == 0) && (((*(buffer+sample_size-1)) & 0x01 )== 1)) {
+                (*(buffer+sample_size-1)) = (*(buffer+sample_size-1)) & 0xfe;
                 //printf("changed to 0");
             }
-
+            //printf(" - %u %u\n", *buffer, *(buffer+sample_size-1));
         }
         fwrite(buffer,1,read,outfile);			// Writing read data into output file
         
@@ -141,7 +154,9 @@ int main(){
     fclose(fileptr);
     fclose(outfile);
     
-    loadImg();
+    // long hh = 1;
+    //printf('ouch: %ld', hh);
+    //loadImg(total_length);
     return 0;
 
 }
