@@ -8,6 +8,9 @@
 
 #include "Encode.h"
 
-void encode(unsigned char *buffer, unsigned char img_bit){
+void encode(unsigned char *buffer, int size, unsigned char img_bit){
+    
+    (*(buffer+(size-1))) = ((*(buffer+(size-1))) & ~1) | img_bit;
+    
     return;
 }

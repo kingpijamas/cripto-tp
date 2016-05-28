@@ -72,7 +72,7 @@ int main(){
             bit = (img_buffer[0]>> index) & 1;
             
             //cambio el ultimo bit del buffer de lectura
-            encode(buffer, bit);
+            encode(buffer, read, bit);
             index++;
         }
         fwrite(buffer,1,read,outfile);			// Writing read data into output file

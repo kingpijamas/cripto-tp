@@ -11,5 +11,5 @@
 
 #include <stdio.h>
 
-void encode(unsigned char *buffer, unsigned char img_bit);
+void encode(unsigned char *buffer, int size, unsigned char img_bit);
 #endif /* Encode_h */
