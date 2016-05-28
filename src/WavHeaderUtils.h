@@ -26,4 +26,6 @@ struct WAV_HEADER {
     unsigned char data_chunk_header [4];        // DATA string or FLLR string
     unsigned int data_size;                     // NumSamples * NumChannels * BitsPerSample/8 - size of the next chunk that will be read
 };
+
+struct WAV_HEADER parseHeader(FILE * fileptr);
 #endif /* WavHeaderUtils_h */
