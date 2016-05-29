@@ -26,7 +26,7 @@ void recover(FILE *fileptr, FILE *img_out){
 
 int main(){
     
-    FILE *fileptr = fopen("../../sample1.wav", "rb");  // Open the file in binary mode
+    FILE *fileptr = fopen("../../sample1.wav", "r+");  // Open the file in binary mode
     if(fileptr == NULL){
         printf("../../fileptr is NULL \n");
         return 0;
@@ -42,27 +42,22 @@ int main(){
     DWORD sz = ftell(img);
     sz += sizeof(DWORD);
     rewind(img);
-    
-    //archivo de audio resuktante que deberia ser igual al original
-    FILE * outfile = fopen("../../outfile.wav", "wb");
-    if(outfile == NULL){
-        printf("out is NULL \n");
-        return 0;
-    }
-    
+        
     //primero leo el header: 44B
     struct WAV_HEADER header = parseHeader(fileptr);
-    fwrite(&header,1,sizeof(header),outfile);
+
+    fseek( fileptr, -(sizeof(header)), SEEK_CUR );
+    fwrite(&header,1,sizeof(header),fileptr);
     
     unsigned short int sample_size = header.bits_per_sample / 8;
     
-    hideLSB(fileptr, outfile, img, sz, sample_size);
+    hideLSB(fileptr, img, sz, sample_size);
     
     fclose(img);
     fclose(fileptr);
-    fclose(outfile);
     
-    outfile = fopen("../../outfile.wav", "rb");
+    
+    FILE *outfile = fopen("../../sample1.wav", "rb");
     if(outfile == NULL){
         printf("out is NULL \n");
         return 0;
@@ -78,7 +73,6 @@ int main(){
     
     fclose(outfile);
     fclose(img_out);
-    
     
     return 0;
 }

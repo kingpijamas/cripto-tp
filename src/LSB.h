@@ -13,7 +13,7 @@
 typedef unsigned long DWORD;
 
 
-void insertSizeLSB(FILE *fileptr, FILE *outfile, unsigned short int sample_size, DWORD size);
+void insertSizeLSB(FILE *fileptr, unsigned short int sample_size, DWORD size);
 
 DWORD getSizeLSB(FILE *fileptr, unsigned short int sample_size);
 

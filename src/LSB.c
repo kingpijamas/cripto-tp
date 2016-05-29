@@ -41,12 +41,11 @@ DWORD getSizeLSB(FILE *fileptr, unsigned short int sample_size){
             i++;
         }
     }
-    printf("%lu \n", *size);
     free(bytes);
     return *size;
 }
 
-void insertSizeLSB(FILE *fileptr, FILE *outfile, unsigned short int sample_size, DWORD size){
+void insertSizeLSB(FILE *fileptr, unsigned short int sample_size, DWORD size){
     //en cuantos bytes se guarda el tamaño
     int dword_size = sizeof(size);
     
@@ -68,7 +67,8 @@ void insertSizeLSB(FILE *fileptr, FILE *outfile, unsigned short int sample_size,
         hideBit(buffer, read, bit);
         index++;
         
-        fwrite(buffer,1,read,outfile);			// Writing read data into output file
+        fseek( fileptr, -(read), SEEK_CUR );
+        fwrite(buffer,1,read,fileptr);			// Writing read data into output file
         
         if (index>=8) { //si ya lei todo un byte agarro el que sigue
             index = 0;
@@ -79,7 +79,7 @@ void insertSizeLSB(FILE *fileptr, FILE *outfile, unsigned short int sample_size,
     free(buffer);
 }
 
-void hideLSB(FILE *fileptr, FILE *outfile, FILE *img, DWORD sz, unsigned short int sample_size){
+void hideLSB(FILE *fileptr, FILE *img, DWORD sz, unsigned short int sample_size){
     int read = 0;
     int write = 0;
     int img_read = 0;
@@ -89,7 +89,7 @@ void hideLSB(FILE *fileptr, FILE *outfile, FILE *img, DWORD sz, unsigned short i
     int index = 0;
     
     //inserto el size
-    insertSizeLSB(fileptr, outfile, sample_size, sz);
+    insertSizeLSB(fileptr, sample_size, sz);
     
     //leo el primer B de la imagen
     img_read = fread(img_buffer, 1, 1, img);
@@ -110,8 +110,8 @@ void hideLSB(FILE *fileptr, FILE *outfile, FILE *img, DWORD sz, unsigned short i
             hideBit(buffer, read, bit);
             index++;
         }
-        fwrite(buffer,1,read,outfile);			// Writing read data into output file
-        
+        fseek( fileptr, -(read), SEEK_CUR );
+        fwrite(buffer,1,read,fileptr);			// Writing read data into output file
     }
 }
 
