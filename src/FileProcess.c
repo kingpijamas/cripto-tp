@@ -58,11 +58,27 @@ int main(){
     
     hideLSB(fileptr, outfile, img, sz, sample_size);
     
-    recover(fileptr, img);
-    
     fclose(img);
     fclose(fileptr);
     fclose(outfile);
+    
+    outfile = fopen("../../outfile.wav", "rb");
+    if(outfile == NULL){
+        printf("out is NULL \n");
+        return 0;
+    }
+    
+    FILE *img_out = fopen("../../img_out1.gif", "wb");
+    if(img == NULL){
+        printf("img is NULL \n");
+        return 0;
+    }
+    
+    recover(outfile, img_out);
+    
+    fclose(outfile);
+    fclose(img_out);
+    
     
     return 0;
 }

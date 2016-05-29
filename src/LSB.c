@@ -41,6 +41,7 @@ DWORD getSizeLSB(FILE *fileptr, unsigned short int sample_size){
             i++;
         }
     }
+    printf("%lu \n", *size);
     free(bytes);
     return *size;
 }
