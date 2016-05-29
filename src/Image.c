@@ -9,15 +9,15 @@
 
 void recover(){
     FILE *fileptr = fopen("../../outfile.wav", "rb");  // Open the file in binary mode
-    if(img == NULL){
+    if(fileptr == NULL){
         printf("../../fileptr is NULL \n");
-        return 0;
+        return;
     }
     
     FILE *img_out = fopen("../../img_out.png", "wb");  // Open the file in binary mode
     if(img_out == NULL){
-        printf("../../fileptr is NULL \n");
-        return 0;
+        printf("../../img_out is NULL \n");
+        return;
     }
     
     //primero leo el header: 44B
@@ -26,7 +26,7 @@ void recover(){
         //daltan leer  bytes vacios
         unsigned char aux_buffer[2];
         fread(aux_buffer, 1, 2, fileptr);
-        fwrite(aux_buffer, 1, 2, outfile);
+        fwrite(aux_buffer, 1, 2, img_out);
     }
     
     int read = 0;
@@ -37,7 +37,7 @@ void recover(){
     unsigned char bit;
     int index = 0;
     //leo el primer B de la imagen
-    img_read = fread(img_buffer, 1, 1, img);
+    img_read = fread(img_buffer, 1, 1, fileptr);
     unsigned char imgByte = 0;
     //leo un sample a la vez
     int size = 824;
