@@ -23,7 +23,7 @@ unsigned int littleTobigEndian2(unsigned char buffer2[]) {
 struct WAV_HEADER parseHeader(FILE * fileptr){
     struct WAV_HEADER header;
     memset(&header, 0, sizeof(header));
-    
+        
     unsigned char buffer2[2];
     unsigned char buffer4[4];
     

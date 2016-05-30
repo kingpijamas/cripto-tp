@@ -42,7 +42,7 @@ DWORD getSizeLSB4(FILE *fileptr, unsigned short int sample_size){
     int dword_size = sizeof(DWORD);
     unsigned char *bytes = (unsigned char *)malloc(dword_size);
     
-    DWORD *size = (DWORD *)malloc(1);
+    DWORD size = 0;
     int index = 0;
     int read = 0;
     unsigned char bits[4];
@@ -59,19 +59,19 @@ DWORD getSizeLSB4(FILE *fileptr, unsigned short int sample_size){
         bits[3] = ((buffer[sample_size-1])>> 3) & 1;
         
         if ((bits[0] & 0x01) == 1) {    //si es un uno, seteoun uno en el bit index de ese byte
-            *size |= 1 << index;
+            size |= 1 << index;
         }
         index++;
         if ((bits[1] & 0x01) == 1) {    //si es un uno, seteoun uno en el bit index de ese byte
-            *size |= 1 << index;
+            size |= 1 << index;
         }
         index++;
         if ((bits[2] & 0x01) == 1) {    //si es un uno, seteoun uno en el bit index de ese byte
-            *size |= 1 << index;
+            size |= 1 << index;
         }
         index++;
         if ((bits[3] & 0x01) == 1) {    //si es un uno, seteoun uno en el bit index de ese byte
-            *size |= 1 << index;
+            size |= 1 << index;
         }
         index++;
         
@@ -80,7 +80,7 @@ DWORD getSizeLSB4(FILE *fileptr, unsigned short int sample_size){
         }
     }
     free(bytes);
-    return *size;
+    return size;
 }
 
 void insertSizeLSB4(FILE *fileptr, FILE *outfile, unsigned short int sample_size, DWORD size){
@@ -104,6 +104,7 @@ void insertSizeLSB4(FILE *fileptr, FILE *outfile, unsigned short int sample_size
         bits[1] = (byte>> index++) & 1;
         bits[2] = (byte>> index++) & 1;
         bits[3] = (byte>> index++) & 1;
+        //printf("%u %u %u %u", bits[0], bits[1], bits[2], bits[3]);
         //cambio el ultimo bit del buffer de lectura
         hideBitsLSB4(buffer, read, bits);
         
@@ -114,6 +115,7 @@ void insertSizeLSB4(FILE *fileptr, FILE *outfile, unsigned short int sample_size
             byte = bytes[++i];
         }
     }
+    printf("%lu \n", size);
     free(bytes);
     free(buffer);
 }
@@ -166,6 +168,7 @@ void recoverLSB4(FILE *fileptr, FILE *img_out,unsigned short int sample_size){
     int index = 0;
     
     img_buffer[0] = 0;
+    
     
     DWORD size = getSizeLSB4(fileptr, sample_size);
     

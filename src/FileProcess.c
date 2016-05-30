@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "WavHeaderUtils.h"
-#include "LSB.c"
+#include "LSB4.c"
 #include "WavHeaderUtils.c"
 #include "FileProcess.h"
 
@@ -21,18 +21,18 @@ void recover(FILE *fileptr, FILE *img_out){
     //primero leo el header: 44B
     struct WAV_HEADER header = parseHeader(fileptr);
     
-    recoverLSB(fileptr, img_out, header.bits_per_sample/8);
+    recoverLSB4(fileptr, img_out, header.bits_per_sample/8);
 }
 
 int main(){
     
-    FILE *fileptr = fopen("../../sample1.wav", "r+");  // Open the file in binary mode
+    FILE *fileptr = fopen("../../sample1.wav", "rb");  // Open the file in binary mode
     if(fileptr == NULL){
         printf("../../fileptr is NULL \n");
         return 0;
     }
     
-    FILE *img = fopen("../../img1.gif", "rb");
+    FILE *img = fopen("../../prueba.png", "rb");
     if(img == NULL){
         printf("img is NULL \n");
         return 0;
@@ -42,28 +42,33 @@ int main(){
     DWORD sz = ftell(img);
     sz += sizeof(DWORD);
     rewind(img);
-        
-    //primero leo el header: 44B
-    struct WAV_HEADER header = parseHeader(fileptr);
-
-    fseek( fileptr, -(sizeof(header)), SEEK_CUR );
-    fwrite(&header,1,sizeof(header),fileptr);
     
-    unsigned short int sample_size = header.bits_per_sample / 8;
-    
-    hideLSB(fileptr, img, sz, sample_size);
-    
-    fclose(img);
-    fclose(fileptr);
-    
-    
-    FILE *outfile = fopen("../../sample1.wav", "rb");
+    //archivo de audio resuktante que deberia ser igual al original
+    FILE * outfile = fopen("../../sample1_out.wav", "wb");
     if(outfile == NULL){
         printf("out is NULL \n");
         return 0;
     }
     
-    FILE *img_out = fopen("../../img_out1.gif", "wb");
+    //primero leo el header: 44B
+    struct WAV_HEADER header = parseHeader(fileptr);
+    fwrite(&header,1,sizeof(header),outfile);
+    
+    unsigned short int sample_size = header.bits_per_sample / 8;
+    
+    hideLSB4(fileptr, outfile, img, sz, sample_size);
+    
+    fclose(img);
+    fclose(fileptr);
+    fclose(outfile);
+    
+    outfile = fopen("../../sample1_out.wav", "rb");
+    if(outfile == NULL){
+        printf("out is NULL \n");
+        return 0;
+    }
+    
+    FILE *img_out = fopen("../../prueba_out.png", "wb");
     if(img == NULL){
         printf("img is NULL \n");
         return 0;
@@ -73,6 +78,7 @@ int main(){
     
     fclose(outfile);
     fclose(img_out);
+    
     
     return 0;
 }
