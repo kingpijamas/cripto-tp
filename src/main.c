@@ -2,16 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-//TODO capaz poner esta constante y las que se usen en un .h
-#define OK 0
-#define INVALID_OP 1
-#define MISSING_IN 2
-#define MISSING_P 3
-#define INVALID_IN_FORMAT 4
-#define MISSING_IN_FILE 5
-#define MISSING_P_FILE 6
-#define INVALID_P_FORMAT 7
+#include "../include/define.h"
 
 int
 main(int argc, char **argv)
@@ -29,7 +20,6 @@ main(int argc, char **argv)
 		printf("-a <aes128 | aes192 | aes256 | des> (OPTIONAL) \n");
 		printf("-m <ecb | cfb | ofb | cbc> (OPTIONAL) \n");
         printf("-pass [password] (OPTIONAL) \t\t\t password de encripcion \n");
-        printf("----------------------------------------------------------------------------------------------\n");
         return OK;
 	}
 
@@ -42,7 +32,12 @@ main(int argc, char **argv)
     int embed = 0, extract = 0;
     int index;
     char *dot;
-    char * inPath, * pPath;
+    char * inPath; //archivo que se va a ocultar
+    char * pPath; //archivo que sera el portador
+    char * outPath; //archivo de salida
+    StegType steg; //algoritmo de esteganografiado
+    EncType enc; //encriptacion
+
     for(index = 1; index<argc && !error; index++){
         switch(index){
             case 1:
@@ -71,7 +66,8 @@ main(int argc, char **argv)
             case 3:
                 dot = strrchr(argv[index], '.');
                 if(embed == 1){
-                    if(dot && !strcmp(dot, ".bmp")){
+                    //TODO chequear esto porque no necesariamente es .bmp
+                    if(dot /*&& !strcmp(dot, ".bmp")*/){
                         //F_OK : Flag meaning test for existence of the file
                         if(access( argv[index], F_OK)==-1) {
                             printf("No existe el archivo\n");
@@ -109,6 +105,76 @@ main(int argc, char **argv)
                         error = INVALID_P_FORMAT;
                     }
                 }
+            case 6:
+                if(embed == 1){
+                    if(strcmp(argv[index], "-out") != 0){
+                        printf("Falta el parametro -out\n");
+                        error = MISSING_OUT;
+                    }
+                }
+                break;
+            case 7:
+                dot = strrchr(argv[index], '.');
+                if(embed == 1){
+                    if(dot && !strcmp(dot, ".wav")){
+                        //F_OK : Flag meaning test for existence of the file
+                        if(access( argv[index], F_OK)==-1) {
+                            printf("No existe el archivo\n");
+                            error = MISSING_OUT_FILE;
+                        }else{
+                            outPath = argv[index];
+                        }    
+                    }else{
+                        printf("Formato incorrecto. El parametro -out espera .wav \n");
+                        error = INVALID_OUT_FORMAT;
+                    }
+                }
+            case 8:
+                if(embed == 1){
+                    if(strcmp(argv[index], "-steg") != 0){
+                        printf("Falta el parametro -steg\n");
+                        error = MISSING_STEG;
+                    }
+                }
+                break;
+            // case 9:
+            //     if(embed == 1){
+            //         switch(argv[index]){
+            //             case LSB1: case LSB4: case LSBE:
+            //                 steg = argv[index];
+            //                 break;
+            //             default:
+            //                 printf("No es valido el algoritmo de esteganografiado \n");
+            //                 error = INVALID_STEG;
+            //                 break;
+            //         }
+            //     }
+            //     break;
+            // default:
+            //     if(embed == 1){
+            //         if(strcmp(argv[index], "-a") == 0){
+            //             index++;
+            //             switch(argv[index]){
+            //             case aes128: case aes192: case aes256: case des:
+            //                 enc = argv[index];
+            //                 break;
+            //             default:
+            //                 printf("No es valida la encriptacion\n");
+            //                 error = INVALID_A;
+            //                 break;
+            //             }
+            //         }
+            //     }
+            //     break;
         }
+        if(error){
+            //TODO aca capaz se podria agregar algo mas
+            return error;
+        }
+
+        //TODO aca habria que llamar al metodo correspondiente con los
+        //parametros recibidos
+        return OK;
+
     }
 }
