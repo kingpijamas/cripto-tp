@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "WavHeaderUtils.h"
-#include "LSB4.c"
+#include "LSB.c"
 #include "WavHeaderUtils.c"
 #include "FileProcess.h"
 
@@ -21,7 +21,7 @@ void recover(FILE *fileptr, FILE *img_out){
     //primero leo el header: 44B
     struct WAV_HEADER header = parseHeader(fileptr);
     
-    recoverLSB4(fileptr, img_out, header.bits_per_sample/8);
+    recoverLSB(fileptr, img_out, header.bits_per_sample/8);
 }
 
 int main(){
@@ -43,6 +43,7 @@ int main(){
     sz += sizeof(DWORD);
     rewind(img);
     
+    unsigned char *bufferHide = (unsigned char *)malloc(sz);
     //archivo de audio resuktante que deberia ser igual al original
     FILE * outfile = fopen("../../sample1_out.wav", "wb");
     if(outfile == NULL){
@@ -50,14 +51,22 @@ int main(){
         return 0;
     }
     
+    memcpy(bufferHide, img, sz+1);
+    fread(bufferHide, sz, 1, img);
+    
     //primero leo el header: 44B
     struct WAV_HEADER header = parseHeader(fileptr);
     fwrite(&header,1,sizeof(header),outfile);
     
     unsigned short int sample_size = header.bits_per_sample / 8;
     
-    hideLSB4(fileptr, outfile, img, sz, sample_size);
+    int total = 0;
+
+    //encriptar lo que hay en el bufferHide: lo que se va a esconder
+    //--------------------------------------------------------------
+    hideLSB(fileptr, outfile, bufferHide, sz, sample_size);
     
+    free(bufferHide);
     fclose(img);
     fclose(fileptr);
     fclose(outfile);

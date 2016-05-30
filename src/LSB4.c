@@ -80,6 +80,7 @@ DWORD getSizeLSB4(FILE *fileptr, unsigned short int sample_size){
         }
     }
     free(bytes);
+    printf("%lu \n", size);
     return size;
 }
 
@@ -115,11 +116,10 @@ void insertSizeLSB4(FILE *fileptr, FILE *outfile, unsigned short int sample_size
             byte = bytes[++i];
         }
     }
-    printf("%lu \n", size);
     free(bytes);
     free(buffer);
 }
-void hideLSB4(FILE *fileptr, FILE *outfile, FILE *img, DWORD sz, unsigned short int sample_size){
+void hideLSB4(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size){
     int read = 0;
     int write = 0;
     int img_read = 0;
@@ -131,7 +131,7 @@ void hideLSB4(FILE *fileptr, FILE *outfile, FILE *img, DWORD sz, unsigned short 
     insertSizeLSB4(fileptr, outfile, sample_size, sz);
     
     //leo el primer B de la imagen
-    img_read = fread(img_buffer, 1, 1, img);
+    img_read = 0;
     unsigned char imgByte = 0;
     
     //leo un sample a la vez
@@ -139,23 +139,24 @@ void hideLSB4(FILE *fileptr, FILE *outfile, FILE *img, DWORD sz, unsigned short 
     {
         if (index>=8) { //si ya lei todo un byte agarro el que sigue
             index = 0;
-            img_read = fread(img_buffer, 1, 1, img);
+            img = img+1;
+            img_read++;
         }
-        if (img_read > 0) {
+        if (img_read < sz) {
             //agarro el bit index
-            bits[0] = (img_buffer[0]>> index++) & 1;
-            bits[1] = (img_buffer[0]>> index++) & 1;
-            bits[2] = (img_buffer[0]>> index++) & 1;
-            bits[3] = (img_buffer[0]>> index++) & 1;
+            bits[0] = ((*img)>> index++) & 1;
+            bits[1] = ((*img)>> index++) & 1;
+            bits[2] = ((*img)>> index++) & 1;
+            bits[3] = ((*img)>> index++) & 1;
             
-            //cambio el ultimo bit del buffer de lectura
-            //printf("%u %u %u %u", bits[0], bits[1], bits[2], bits[3]);
+            //cambio los 4 ultimo bit del buffer de lectura
             hideBitsLSB4(buffer, read, bits);
             
         }
         fwrite(buffer,1,read,outfile);			// Writing read data into output file
         
     }
+    
 }
 
 void recoverLSB4(FILE *fileptr, FILE *img_out,unsigned short int sample_size){
@@ -172,15 +173,17 @@ void recoverLSB4(FILE *fileptr, FILE *img_out,unsigned short int sample_size){
     
     DWORD size = getSizeLSB4(fileptr, sample_size);
     
-    while(size > 0)
+    unsigned char *img_buffer_file = (unsigned char *)malloc(size);
+    
+    int i = 0;
+    while(i < size)
     {
         read = fread(buffer, 1, sample_size, fileptr);
         
         if (index>=8) { //si ya lei todo un byte agarro el que sigue
             index = 0;
-            img_read = fwrite(img_buffer, 1, 1, img_out);
+            memcpy(img_buffer_file+(i++), img_buffer, 1);
             img_buffer[0] = 0;
-            size--;
         }
         //agarro el ultimo bit de la muestra
         bits[0] = ((buffer[sample_size-1]) >> 0) & 1;
@@ -205,4 +208,8 @@ void recoverLSB4(FILE *fileptr, FILE *img_out,unsigned short int sample_size){
         }
         index++;
     }
+    //desencriptar buffer
+    //------------------
+    fwrite(img_buffer_file, size, 1, img_out);
+    free(img_buffer_file);
 }
