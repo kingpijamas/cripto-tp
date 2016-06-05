@@ -1,10 +1,3 @@
-//
-//  LSB.c
-//  
-//
-//  Created by Julieta Sal-lari on 29/5/16.
-//
-//
 
 #include "LSB.h"
 
@@ -18,7 +11,6 @@ void hideBit(unsigned char *buffer, int size, unsigned char img_bit){
 DWORD getSizeLSB(FILE *fileptr, unsigned short int sample_size){
     unsigned char buffer[sample_size];
     int dword_size = sizeof(DWORD);
-    unsigned char *bytes = (unsigned char *)malloc(dword_size);
     
     DWORD size = 0;
     int index = 0;
@@ -26,9 +18,7 @@ DWORD getSizeLSB(FILE *fileptr, unsigned short int sample_size){
     unsigned char bit;
     int i = 0;
     while (i < dword_size) {
-        if (index == 0 ) {
-            bytes[i] = 0;
-        }
+
         read = fread(buffer, 1, sample_size, fileptr);
         //agarro el bit menos sig de la musetra
         bit = ((buffer[sample_size-1])>> 0) & 1;
@@ -41,7 +31,6 @@ DWORD getSizeLSB(FILE *fileptr, unsigned short int sample_size){
             i++;
         }
     }
-    free(bytes);
     return size;
 }
 

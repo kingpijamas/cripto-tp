@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "WavHeaderUtils.h"
-#include "LSB.c"
+#include "LSB4.c"
 #include "WavHeaderUtils.c"
 #include "FileProcess.h"
 
@@ -21,7 +21,7 @@ void recover(FILE *fileptr, FILE *img_out){
     //primero leo el header: 44B
     struct WAV_HEADER header = parseHeader(fileptr);
     
-    recoverLSB(fileptr, img_out, header.bits_per_sample/8);
+    recoverLSB4(fileptr, img_out, header.bits_per_sample/8);
 }
 
 int main(){
@@ -64,7 +64,7 @@ int main(){
 
     //encriptar lo que hay en el bufferHide: lo que se va a esconder
     //--------------------------------------------------------------
-    hideLSB(fileptr, outfile, bufferHide, sz, sample_size);
+    hideLSB4(fileptr, outfile, bufferHide, sz, sample_size);
     
     free(bufferHide);
     fclose(img);
