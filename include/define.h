@@ -12,27 +12,9 @@
 #define MISSING_STEG 11
 #define INVALID_STEG 12
 #define INVALID_A 13
+#define INVALID_M 14
+#define MISSING_PASS 15
 
 #define NUM_ENC 4
 #define STRING_SIZE 10
 
-typedef enum {
-  LSB1,
-  LSB4,
-  LSBE
-} StegType;
-
-typedef enum {
-  aes128,
-  aes192,
-  aes256,
-  des
-} EncType;
-
-//typedef char enc[NUM_ENC][NUM_ENC];
-
-// char *enc[NUM_ENC];
-// enc[0] = "aes128";
-// enc[1] = "aes192";
-// enc[2] = "aes256";
-// enc[3] = "des";
