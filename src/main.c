@@ -4,28 +4,20 @@
 #include <unistd.h>
 #include "../include/define.h"
 
-#define NO_COMMAND 0
-#define ANALYZE    1
-#define EMBED 	   2
-#define EXTRACT    3
+static void fail(int code, char * param);
+static void expect_param_to_eq(char * param, char * expected, int error_code);
+static void expect_file_to_exist(char * path, int error_code);
+static int file_exists(char * path);
+static int streq(char * str1, char * str2);
+static int empty(char * str);
+static int valid_steg_algorithm(char * algorithm);
+static int valid_encryption(char * encryption);
+static int valid_mode(char * mode);
+static void print_help();
 
 int main(int argc, char **argv) {
-	if (argc == 2 && strcmp(argv[1], "-h") == 0) {
-		printf(
-				"----------------------------------------------------------------------------------------------\n");
-		printf("Help Menu \n");
-		printf(
-				"----------------------------------------------------------------------------------------------\n");
-		printf("-embed \t\t\t\t\t\t Indica que se va a ocultar información \n");
-		printf("-extract \t\t\t\t\t Indica que se va a extraer información \n");
-		printf("-in [file] \t\t\t\t\t Archivo que se va a ocultar \n");
-		printf("-p [wavefile] \t\t\t\t\t Archivo wav portador \n");
-		printf("-out [file] \t\t\t\t\t Archivo de salida obtenido \n");
-		printf(
-				"-steg <LSB1 | LSB4 | LSBE> \t\t\t Algoritmo de esteganografiado \n");
-		printf("-a <aes128 | aes192 | aes256 | des> (OPTIONAL) \n");
-		printf("-m <ecb | cfb | ofb | cbc> (OPTIONAL) \n");
-		printf("-pass [password] (OPTIONAL) \t\t\t password de encripcion \n");
+	if (argc > 1 && streq(argv[1], "-h")) {
+		print_help();
 		return OK;
 	}
 
@@ -36,80 +28,59 @@ int main(int argc, char **argv) {
 	// }
 
 	if (argc < 8 || argc > 16) {
-		printf("Numero incorrecto de parametros\n");
-		return -1;
+		fail(INC_PARAMC);
 	}
 
-	int error = 0;
 	int command = NO_COMMAND;
 	int index;
-	char *dot;
-	char * inPath; //archivo que se va a ocultar
-	char * pPath; //archivo que sera el portador
-	char * outPath; //archivo de salida
+	char * dot;
+	char * in_path;	//archivo que se va a ocultar
+	char * p_path; 	//archivo que sera el portador
+	char * out_path; //archivo de salida
 	//algoritmo de esteganografiado, encriptacion, modo y password
-	char * stegType, *encType, *mode, *pass;
+	char * steg_type, * enc_type, * mode, * pass;
 
-	for (index = 1; index < argc && !error; index++) {
+	for (index = 1; index < argc; index++) {
+		char param = argv[index];
+
 		switch (index) {
 		case 1:
-			if (strcmp(argv[index], "-embed") == 0) {
+			if (streq(param, "-embed")) {
 				command = EMBED;
-			} else if (strcmp(argv[index], "-extract") == 0) {
+			} else if (streq(param, "-extract")) {
 				command = EXTRACT;
 			} else {
-				printf("Operacion invalida\n");
-				error = INVALID_OP;
+				fail(INVALID_OP, param);
 			}
 			break;
 		case 2:
 			switch (command) {
 			case EMBED:
-				if (strcmp(argv[index], "-in") != 0) {
-					printf("Falta el parametro -in\n");
-					error = MISSING_IN;
-				}
+				expect_param_to_eq(param, "-in", MISSING_IN)
 				break;
 			case EXTRACT:
-				if (strcmp(argv[index], "-p") != 0) {
-					printf("Falta el parametro -p\n");
-					error = MISSING_P;
-				}
+				expect_param_to_eq(param, "-p", MISSING_P)
 				break;
 			}
 			break;
 		case 3:
-			dot = strrchr(argv[index], '.');
+			dot = strrchr(param, '.');
 			switch (command) {
 			case EMBED:
 				//TODO chequear esto porque no necesariamente es .bmp
 				if (dot /*&& !strcmp(dot, ".bmp")*/) {
-					//F_OK : Flag meaning test for existence of the file
-					if (access(argv[index], F_OK) == -1) {
-						printf("No existe el archivo %s\n", argv[index]);
-						error = MISSING_IN_FILE;
-					} else {
-						inPath = argv[index];
-					}
+					expect_file_to_exist(param, MISSING_IN_FILE);
+					in_path = param;
 				} else {
-					printf(
-							"Formato incorrecto. El parametro -in espera .bmp \n");
-					error = INVALID_IN_FORMAT;
+					fail(INVALID_IN_FORMAT, param);
 				}
 				break;
 			case EXTRACT:
-				if (dot && !strcmp(dot, ".wav")) {
-					//F_OK : Flag meaning test for existence of the file
-					if (access(argv[index], F_OK) == -1) {
-						printf("No existe el archivo %s\n", argv[index]);
-						error = MISSING_P_FILE;
-					} else {
-						pPath = argv[index];
-					}
+				if (dot && !strcmp(dot, WAV_EXT)) {
+					expect_file_to_exist(param, MISSING_P_FILE);
+					p_path = param;
 				} else {
-					printf(
-							"Formato incorrecto. El parametro -p espera .wav \n");
-					error = INVALID_P_FORMAT;
+					fail(INVALID_P_FORMAT, param);
 				}
 				break;
 			}
@@ -117,96 +88,62 @@ int main(int argc, char **argv) {
 		case 4:
 			switch (command) {
 			case EMBED:
-				if (strcmp(argv[index], "-p") != 0) {
-					printf("Falta el parametro -p\n");
-					error = MISSING_P;
-				}
+				expect_param_to_eq(param, "-p", MISSING_P)
 				break;
 			case EXTRACT:
-				if (strcmp(argv[index], "-out") != 0) {
-					printf("Falta el parametro -out\n");
-					error = MISSING_OUT;
-				}
+				expect_param_to_eq(param, "-out", MISSING_OUT)
 				break;
 			}
 			break;
 		case 5:
-			dot = strrchr(argv[index], '.');
+			dot = strrchr(param, '.');
 			switch (command) {
 			case EMBED:
-				if (dot && !strcmp(dot, ".wav")) {
-					//F_OK : Flag meaning test for existence of the file
-					if (access(argv[index], F_OK) == -1) {
-						printf("No existe el archivo %s\n", argv[index]);
-						error = MISSING_P_FILE;
-					} else {
-						pPath = argv[index];
-					}
+				if (dot && streq(dot, WAV_EXT)) {
+					expect_file_to_exist(param, MISSING_P_FILE);
+					p_path = param;
 				} else {
-					printf(
-							"Formato incorrecto. El parametro -p espera .wav \n");
-					error = INVALID_P_FORMAT;
+					fail(INVALID_P_FORMAT, param);
 				}
 				break;
 			case EXTRACT:
-				if (access(argv[index], F_OK) == -1) {
-					printf("No existe el archivo %s\n", argv[index]);
-					error = MISSING_OUT_FILE;
-				} else {
-					outPath = argv[index];
-				}
+				expect_file_to_exist(param, MISSING_OUT_FILE);
+				out_path = param;
 				break;
 			}
 			break;
 		case 6:
 			switch (command) {
 			case EMBED:
-				if (strcmp(argv[index], "-out") != 0) {
-					printf("Falta el parametro -out\n");
-					error = MISSING_OUT;
-				}
+				expect_param_to_eq(param, "-out", MISSING_OUT);
 				break;
 			case EXTRACT:
-				if (strcmp(argv[index], "-steg") != 0) {
-					printf("Falta el parametro -steg\n");
-					error = MISSING_STEG;
-				}
+				expect_param_to_eq(param, "-steg", MISSING_STEG);
 				break;
 			}
 			break;
 		case 7:
-			dot = strrchr(argv[index], '.');
+			dot = strrchr(param, '.');
 			switch (command) {
 			case EMBED:
-				if (dot && !strcmp(dot, ".wav")) {
-					//F_OK : Flag meaning test for existence of the file
-					if (access(argv[index], F_OK) == -1) {
-						printf("No existe el archivo %s\n", argv[index]);
-						error = MISSING_OUT_FILE;
-					} else {
-						outPath = argv[index];
-					}
+				if (dot && streq(dot, WAV_EXT)) {
+					expect_file_to_exist(param, MISSING_OUT_FILE);
+					out_path = param;
 				} else {
-					printf(
-							"Formato incorrecto. El parametro -out espera .wav \n");
-					error = INVALID_OUT_FORMAT;
+					fail(INVALID_OUT_FORMAT, param);
 				}
 				break;
 			case EXTRACT:
-				if (strcmp(argv[index], "LSB1") == 0
-						|| strcmp(argv[index], "LSB4") == 0
-						|| strcmp(argv[index], "LSBE") == 0) {
-					stegType = argv[index];
-				} else {
-					printf("No es valido el algoritmo de esteganografiado \n");
-					error = INVALID_STEG;
+				if (!valid_stego) { // XXX
+					fail(INVALID_STEG, param);
 				}
+				steg_type = param;
 				break;
 			}
 			break;
 			// case 8:
 			//     if(embed == 1){
-			//         if(strcmp(argv[index], "-steg") != 0){
+			//         if(strcmp(param, "-steg") != 0){
 			//             printf("Falta el parametro -steg\n");
 			//             error = MISSING_STEG;
 			//         }
@@ -214,10 +151,10 @@ int main(int argc, char **argv) {
 			//     break;
 			// case 9:
 			//     if(embed == 1){
-			//         if(strcmp(argv[index], "LSB1") == 0
-			//             || strcmp(argv[index], "LSB4") == 0
-			//             || strcmp(argv[index], "LSBE") == 0){
-			//             stegType = argv[index];
+			//         if(strcmp(param, "LSB1") == 0
+			//             || strcmp(param, "LSB4") == 0
+			//             || strcmp(param, "LSBE") == 0){
+			//             steg_type = param;
 			//         }else{
 			//             printf("No es valido el algoritmo de esteganografiado \n");
 			//             error = INVALID_STEG;
@@ -227,88 +164,55 @@ int main(int argc, char **argv) {
 		default:
 			if (command == EMBED && index < 10) {
 				if (index == 8) {
-					if (strcmp(argv[index], "-steg") != 0) {
-						printf("Falta el parametro -steg\n");
-						error = MISSING_STEG;
-					}
+					expect_param_to_eq(param, "-steg", MISSING_STEG);
 					break;
-				} else if (index == 9) {
-					if (strcmp(argv[index], "LSB1") == 0
-							|| strcmp(argv[index], "LSB4") == 0
-							|| strcmp(argv[index], "LSBE") == 0) {
-						stegType = argv[index];
-					} else {
-						printf(
-								"No es valido el algoritmo de esteganografiado \n");
-						error = INVALID_STEG;
+				}
+				if (index == 9) {
+					if (!valid_steg_algorithm(param)) {
+						fail(INVALID_STEG, param);
 					}
+					steg_type = param;
 					break;
 				}
 			}
-			if (strcmp(argv[index], "-a") == 0) {
-				index++;
-				if (strcmp(argv[index], "aes128") == 0
-						|| strcmp(argv[index], "aes192") == 0
-						|| strcmp(argv[index], "aes256") == 0
-						|| strcmp(argv[index], "des") == 0) {
-					encType = argv[index];
-				} else {
-					printf("No es valida la encriptacion\n");
-					error = INVALID_A;
+			if (streq(param, "-a")) {
+				index++; // XXX
+				param = argv[index];
+				if (!valid_encryption(param)) {
+					fail(INVALID_A, param);
 				}
-			} else if (strcmp(argv[index], "-m") == 0) {
-				index++;
-				if (strcmp(argv[index], "ecb") == 0
-						|| strcmp(argv[index], "cfb") == 0
-						|| strcmp(argv[index], "ofb") == 0
-						|| strcmp(argv[index], "cbc") == 0) {
-					mode = argv[index];
-				} else {
-					printf("No es valido el modo\n");
-					error = INVALID_M;
+				enc_type = param;
+			} else if (streq(param, "-m")) {
+				index++; // XXX
+				param = argv[index];
+				if (!valid_mode(param)) {
+					fail(INVALID_M, param);
 				}
-			} else if (strcmp(argv[index], "-pass") == 0) {
-				index++;
-				if (strcmp(argv[index], "") != 0) {
-					pass = argv[index];
-				} else {
-					printf("Falta la password\n");
-					error = MISSING_PASS;
+				mode = param;
+			} else if (streq(param, "-pass")) {
+				index++; // XXX
+				param = argv[index];
+				if (empty(param)) {
+					fail(MISSING_PASS, param);
 				}
+				pass = param;
 			}
 			break;
 		}
 	}
 
-	if (command == EMBED && !error && argc > 10) {
-		//printf("Entra aca\n");
-		//algoritmo y password pero no modo
-		if (strcmp(encType, "") != 0 && strcmp(pass, "") != 0
-				&& strcmp(mode, "") == 0) {
-			mode = "cbc"; //Se asume CBC por default
+	if (command == EMBED && argc > 10) {
+		if (empty(pass)) {
+			fail(MISSING_PASS, argv[index]);
 		}
-		//modo y password pero no algoritmo
-		else if (strcmp(encType, "") == 0 && strcmp(pass, "") != 0
-				&& strcmp(mode, "") != 0) {
-			encType = "aes128"; //Se asume aes128 por default
-		}
-		//sólo password
-		else if (strcmp(encType, "") == 0 && strcmp(pass, "") != 0
-				&& strcmp(mode, "") == 0) {
-			mode = "cbc"; //Se asume CBC por default
-			encType = "aes128"; //Se asume aes128 por default
-		}
-		//hay encriptacion, modo y no password -- no es valido
-		else if (strcmp(encType, "") != 0 && strcmp(pass, "") == 0
-				&& strcmp(mode, "") != 0) {
-			printf("Falta la password\n");
-			error = MISSING_PASS;
-		}
-	}
 
-	if (error) {
-		//TODO aca capaz se podria agregar algo mas
-		return error;
+		if (empty(mode)) {
+			mode = DEFAULT_MODE;
+		}
+
+		if (empty(enc_type)) {
+			enc_type = DEFAULT_ENCTYPE;
+		}
 	}
 
 	//TODO aca habria que llamar al metodo correspondiente con los
@@ -316,11 +220,13 @@ int main(int argc, char **argv) {
 
 	switch (command) {
 	case EMBED:
-
+		// TODO
 		break;
 	case EXTRACT:
+		// TODO
 		break;
 	case ANALYZE:
+		// TODO
 		break;
 	default:
 		printf("No command assigned!");
@@ -329,5 +235,115 @@ int main(int argc, char **argv) {
 	}
 
 	return OK;
+}
 
+void expect_param_to_eq(char * param, char * expected, int error_code) {
+	if (!streq(param, expected) {
+		fail(error_code, param);
+	}
+}
+
+void expect_file_to_exist(char * path, int error_code) {
+	if (!file_exists(path)) {
+		fail(error_code, NULL);
+	}
+}
+
+int file_exists(char * path) {
+	return access(path, F_OK) != -1;
+}
+
+int streq(char * str1, char * str2) {
+	return strcmp(str1, str2) == 0;
+}
+
+int empty(char * str) {
+	return *str == '\0';
+}
+
+int valid_steg_algorithm(char * algorithm) {
+	return strcmp(algorithm, "LSB1") == 0
+			|| strcmp(algorithm, "LSB4") == 0
+			|| strcmp(algorithm, "LSBE") == 0;
+}
+
+int valid_encryption(char * encryption) {
+	return strcmp(encryption, "aes128") == 0
+			|| strcmp(encryption, "aes192") == 0
+			|| strcmp(encryption, "aes256") == 0
+			|| strcmp(encryption, "des") == 0;
+}
+
+int valid_mode(char * mode) {
+	return strcmp(mode, "ecb") == 0
+			|| strcmp(mode, "cfb") == 0
+			|| strcmp(mode, "ofb") == 0
+			|| strcmp(mode, "cbc") == 0;
+}
+
+
+void print_help() {
+	printf("----------------------------------------------------------------------------------------------\n");
+	printf("Help Menu \n");
+	printf("----------------------------------------------------------------------------------------------\n");
+	printf("-embed \t\t\t\t\t\t Indica que se va a ocultar información \n");
+	printf("-extract \t\t\t\t\t Indica que se va a extraer información \n");
+	printf("-in [file] \t\t\t\t\t Archivo que se va a ocultar \n");
+	printf("-p [wavefile] \t\t\t\t\t Archivo wav portador \n");
+	printf("-out [file] \t\t\t\t\t Archivo de salida obtenido \n");
+	printf(
+			"-steg <LSB1 | LSB4 | LSBE> \t\t\t Algoritmo de esteganografiado \n");
+	printf("-a <aes128 | aes192 | aes256 | des> (OPTIONAL) \n");
+	printf("-m <ecb | cfb | ofb | cbc> (OPTIONAL) \n");
+	printf("-pass [password] (OPTIONAL) \t\t\t password de encripcion \n");
+}
+
+void fail(int code, char * param) {
+	switch(error) {
+		case INC_PARAMC:
+			printf("Numero incorrecto de parametros\n");
+			break;
+		case INVALID_A:
+			printf("No es valida la encriptacion\n");
+			break;
+		case INVALID_MODE:
+			printf("No es valido el modo\n");
+			break;
+		case INVALID_OP:
+			printf("Operacion invalida\n");
+			break;
+		case MISSING_IN:
+			printf("Falta el parametro -in\n");
+			break;
+		case MISSING_P:
+			printf("Falta el parametro -p\n");
+			break;
+		case MISSING_OUT:
+			printf("Falta el parametro -out\n")
+			break;
+		case MISSING_STEG:
+			printf("Falta el parametro -steg\n")
+			break;
+		case MISSING_PASS:
+			printf("Falta la password\n");
+			break;
+		case MISSING_IN_FILE:
+		case MISSING_OUT_FILE:
+		case MISSING_P_FILE:
+			printf("No existe el archivo %s\n", param);
+			break;
+		case INVALID_P_FORMAT:
+			printf("Formato incorrecto. El parametro -p espera .wav \n");
+			break;
+		case INVALID_IN_FORMAT:
+			printf("Formato incorrecto. El parametro -in espera .bmp \n");
+			break;
+		case INVALID_OUT_FORMAT:
+			printf("Formato incorrecto. El parametro -p espera .wav \n");
+			break;
+		case INVALID_STEG:
+			printf("No es valido el algoritmo de esteganografiado \n");
+			break;
+	}
+	exit(-1);
 }
