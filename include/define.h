@@ -7,6 +7,7 @@
 #define DEFAULT_ENCTYPE     "aes128"
 
 #define WAV_EXT					    ".wav"
+#define BMP_EXT             ".bmp"
 
 #define OK                   0
 #define INVALID_OP           1
@@ -27,3 +28,7 @@
 
 #define NUM_ENC              4
 #define STRING_SIZE         10
+
+enum bool {
+  true = 1, false = 0;
+}

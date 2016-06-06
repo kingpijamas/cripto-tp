@@ -4,16 +4,23 @@
 #include <unistd.h>
 #include "../include/define.h"
 
-static void fail(int code, char * param);
-static void expect_param_to_eq(char * param, char * expected, int error_code);
-static void expect_file_to_exist(char * path, int error_code);
 static int file_exists(char * path);
 static int streq(char * str1, char * str2);
 static int empty(char * str);
 static int valid_steg_algorithm(char * algorithm);
 static int valid_encryption(char * encryption);
 static int valid_mode(char * mode);
+static int has_suffix(char * str, char * suffix);
+
+static void expect_param_to_eq(char * param, char * expected, int error_code);
+static void expect_file_to_exist(char * path, int error_code);
+static void expect_suffix(char * param, char * suffix, int error_code);
+static void expect_in_or_p(char * param, int command);
+
+static void fail(int code, char * param);
+
 static void print_help();
+static void parse_command(char * param, int * command);
 
 int main(int argc, char **argv) {
 	if (argc > 1 && streq(argv[1], "-h")) {
@@ -33,55 +40,31 @@ int main(int argc, char **argv) {
 
 	int command = NO_COMMAND;
 	int index;
-	char * dot;
 	char * in_path;	//archivo que se va a ocultar
 	char * p_path; 	//archivo que sera el portador
 	char * out_path; //archivo de salida
 	//algoritmo de esteganografiado, encriptacion, modo y password
 	char * steg_type, * enc_type, * mode, * pass;
 
-	for (index = 1; index < argc; index++) {
+	parse_command(argv[1], &command);
+	expect_in_or_p(argv[2], command);
+
+	for (index = 3; index < argc; index++) {
 		char param = argv[index];
 
 		switch (index) {
-		case 1:
-			if (streq(param, "-embed")) {
-				command = EMBED;
-			} else if (streq(param, "-extract")) {
-				command = EXTRACT;
-			} else {
-				fail(INVALID_OP, param);
-			}
-			break;
-		case 2:
-			switch (command) {
-			case EMBED:
-				expect_param_to_eq(param, "-in", MISSING_IN)
-				break;
-			case EXTRACT:
-				expect_param_to_eq(param, "-p", MISSING_P)
-				break;
-			}
-			break;
 		case 3:
-			dot = strrchr(param, '.');
 			switch (command) {
 			case EMBED:
 				//TODO chequear esto porque no necesariamente es .bmp
-				if (dot /*&& !strcmp(dot, ".bmp")*/) {
-					expect_file_to_exist(param, MISSING_IN_FILE);
-					in_path = param;
-				} else {
-					fail(INVALID_IN_FORMAT, param);
-				}
+				expect_suffix(param, BMP_EXT, INVALID_IN_FORMAT);
+				expect_file_to_exist(param, MISSING_IN_FILE);
+				in_path = param;
 				break;
 			case EXTRACT:
-				if (dot && !strcmp(dot, WAV_EXT)) {
-					expect_file_to_exist(param, MISSING_P_FILE);
-					p_path = param;
-				} else {
-					fail(INVALID_P_FORMAT, param);
-				}
+				expect_suffix(param, WAV_EXT, INVALID_P_FORMAT);
+				expect_file_to_exist(param, MISSING_P_FILE);
+				p_path = param;
 				break;
 			}
 			break;
@@ -96,15 +79,11 @@ int main(int argc, char **argv) {
 			}
 			break;
 		case 5:
-			dot = strrchr(param, '.');
 			switch (command) {
 			case EMBED:
-				if (dot && streq(dot, WAV_EXT)) {
-					expect_file_to_exist(param, MISSING_P_FILE);
-					p_path = param;
-				} else {
-					fail(INVALID_P_FORMAT, param);
-				}
+				expect_suffix(param, WAV_EXT, INVALID_P_FORMAT);
+				expect_file_to_exist(param, MISSING_P_FILE);
+				p_path = param;
 				break;
 			case EXTRACT:
 				expect_file_to_exist(param, MISSING_OUT_FILE);
@@ -123,15 +102,11 @@ int main(int argc, char **argv) {
 			}
 			break;
 		case 7:
-			dot = strrchr(param, '.');
 			switch (command) {
 			case EMBED:
-				if (dot && streq(dot, WAV_EXT)) {
-					expect_file_to_exist(param, MISSING_OUT_FILE);
-					out_path = param;
-				} else {
-					fail(INVALID_OUT_FORMAT, param);
-				}
+				expect_suffix(param, WAV_EXT, INVALID_OUT_FORMAT);
+				expect_file_to_exist(param, MISSING_OUT_FILE);
+				out_path = param;
 				break;
 			case EXTRACT:
 				if (!valid_stego) { // XXX
@@ -249,6 +224,23 @@ void expect_file_to_exist(char * path, int error_code) {
 	}
 }
 
+void expect_suffix(char * param, char * suffix, int error_code) {
+	if (!has_suffix(param, suffix)) {
+		fail(error_code, param);
+	}
+}
+
+void expect_in_or_p(char * param, int command) {
+	switch (command) {
+	case EMBED:
+		expect_param_to_eq(param, "-in", MISSING_IN)
+		break;
+	case EXTRACT:
+		expect_param_to_eq(param, "-p", MISSING_P)
+		break;
+	}
+}
+
 int file_exists(char * path) {
 	return access(path, F_OK) != -1;
 }
@@ -259,6 +251,15 @@ int streq(char * str1, char * str2) {
 
 int empty(char * str) {
 	return *str == '\0';
+}
+
+int has_suffix(char * str, char * suffix) {
+	char * last_appearance = strrchr(param, suffix);
+	if (last_appearance == NULL || strlen(last_appearance) > strlen(suffix)) {
+		// 'suffix' is not actually a suffix, just a substring
+		return false;
+	}
+	return last_appearance;
 }
 
 int valid_steg_algorithm(char * algorithm) {
@@ -281,6 +282,15 @@ int valid_mode(char * mode) {
 			|| strcmp(mode, "cbc") == 0;
 }
 
+void parse_command(char * param, int * command) {
+	if (streq(param, "-embed")) {
+		*command = EMBED;
+	} else if (streq(param, "-extract")) {
+		*command = EXTRACT;
+	} else {
+		fail(INVALID_OP, param);
+	}
+}
 
 void print_help() {
 	printf("----------------------------------------------------------------------------------------------\n");
