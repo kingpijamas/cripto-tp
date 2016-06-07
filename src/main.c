@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 	// }
 
 	if (argc < 8 || argc > 16) {
-		fail(INC_PARAMC);
+		fail(INC_PARAMC, NULL);
 	}
 
 	int command = NO_COMMAND;
@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 	char * p_path; 	//archivo que sera el portador
 	char * out_path; //archivo de salida
 	//algoritmo de esteganografiado, encriptacion, modo y password
-	char * steg_type, * enc_type, * mode, * pass;
+	char * steg_type, *enc_type, *mode, *pass;
 
 	parse_command(argv[1], &command);
 	switch (command) {
@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
 	expect_in_or_p(argv[2], command);
 
 	for (index = 3; index < argc; index++) {
-		char param = argv[index];
+		char * param = argv[index];
 
 		switch (index) {
 		case 3:
@@ -79,10 +79,10 @@ int main(int argc, char **argv) {
 		case 4:
 			switch (command) {
 			case EMBED:
-				expect_param_to_eq(param, "-p", MISSING_P)
+				expect_param_to_eq(param, "-p", MISSING_P);
 				break;
 			case EXTRACT:
-				expect_param_to_eq(param, "-out", MISSING_OUT)
+				expect_param_to_eq(param, "-out", MISSING_OUT);
 				break;
 			}
 			break;
@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
 				out_path = param;
 				break;
 			case EXTRACT:
-				if (!valid_stego) { // XXX
+				if (!valid_steg_algorithm(param)) { // XXX
 					fail(INVALID_STEG, param);
 				}
 				steg_type = param;
@@ -206,8 +206,31 @@ int main(int argc, char **argv) {
 		// TODO
 		break;
 	case EXTRACT:
-		// TODO
-		break;
+		FILE *vector = fopen(p_path, "rb");
+		FILE *outfile = fopen(out_path, "wb");
+		FILE *img = fopen(in_path, "rb");
+		struct WAV_HEADER header = parseHeader(vector);
+		fwrite(&header, 1, sizeof(header), outfile);
+		fseek(img, 0L, SEEK_END);
+		DWORD sz = ftell(img);
+		sz += sizeof(DWORD);
+		rewind(img);
+		unsigned short int vector_size = header.bits_per_sample / 8;
+
+		unsigned char *bufferHide = (unsigned char *) malloc(sz);
+		memcpy(bufferHide, img, sz + 1);
+		fread(bufferHide, sz, 1, img);
+
+		if (strcmp(steg_type, "LSB1") == 0) {
+			hideLSB(vector, outfile, bufferHide, sz, vector_size);
+		} else if (strcmp(steg_type, "LSB4") == 0) {
+			hideLSB4(vector, outfile, bufferHide, sz, vector_size);
+		} else if (strcmp(steg_type, "LSBE") == 0) {
+			hideLSBEnh(vector, outfile, bufferHide, sz, vector_size);
+		} else {
+			break;
+		}
+		return OK;
 	case ANALYZE:
 		// TODO
 		break;
@@ -221,7 +244,7 @@ int main(int argc, char **argv) {
 }
 
 void expect_param_to_eq(char * param, char * expected, int error_code) {
-	if (!streq(param, expected) {
+	if (!streq(param, expected)) {
 		fail(error_code, param);
 	}
 }
@@ -241,10 +264,10 @@ void expect_suffix(char * param, char * suffix, int error_code) {
 void expect_in_or_p(char * param, int command) {
 	switch (command) {
 	case EMBED:
-		expect_param_to_eq(param, "-in", MISSING_IN)
+		expect_param_to_eq(param, "-in", MISSING_IN);
 		break;
 	case EXTRACT:
-		expect_param_to_eq(param, "-p", MISSING_P)
+		expect_param_to_eq(param, "-p", MISSING_P);
 		break;
 	}
 }
@@ -262,7 +285,7 @@ int empty(char * str) {
 }
 
 int has_suffix(char * str, char * suffix) {
-	char * last_appearance = strrchr(param, suffix);
+	char * last_appearance = strrchr(str, suffix);
 	if (last_appearance == NULL || strlen(last_appearance) > strlen(suffix)) {
 		// 'suffix' is not actually a suffix, just a substring
 		return false;
@@ -271,8 +294,7 @@ int has_suffix(char * str, char * suffix) {
 }
 
 int valid_steg_algorithm(char * algorithm) {
-	return strcmp(algorithm, "LSB1") == 0
-			|| strcmp(algorithm, "LSB4") == 0
+	return strcmp(algorithm, "LSB1") == 0 || strcmp(algorithm, "LSB4") == 0
 			|| strcmp(algorithm, "LSBE") == 0;
 }
 
@@ -284,10 +306,8 @@ int valid_encryption(char * encryption) {
 }
 
 int valid_mode(char * mode) {
-	return strcmp(mode, "ecb") == 0
-			|| strcmp(mode, "cfb") == 0
-			|| strcmp(mode, "ofb") == 0
-			|| strcmp(mode, "cbc") == 0;
+	return strcmp(mode, "ecb") == 0 || strcmp(mode, "cfb") == 0
+			|| strcmp(mode, "ofb") == 0 || strcmp(mode, "cbc") == 0;
 }
 
 void parse_command(char * param, int * command) {
@@ -301,9 +321,11 @@ void parse_command(char * param, int * command) {
 }
 
 void print_help() {
-	printf("----------------------------------------------------------------------------------------------\n");
+	printf(
+			"----------------------------------------------------------------------------------------------\n");
 	printf("Help Menu \n");
-	printf("----------------------------------------------------------------------------------------------\n");
+	printf(
+			"----------------------------------------------------------------------------------------------\n");
 	printf("-embed \t\t\t\t\t\t Indica que se va a ocultar información \n");
 	printf("-extract \t\t\t\t\t Indica que se va a extraer información \n");
 	printf("-in [file] \t\t\t\t\t Archivo que se va a ocultar \n");
@@ -317,51 +339,51 @@ void print_help() {
 }
 
 void fail(int code, char * param) {
-	switch(error) {
-		case INC_PARAMC:
-			printf("Numero incorrecto de parametros\n");
-			break;
-		case INVALID_A:
-			printf("No es valida la encriptacion\n");
-			break;
-		case INVALID_MODE:
-			printf("No es valido el modo\n");
-			break;
-		case INVALID_OP:
-			printf("Operacion invalida\n");
-			break;
-		case MISSING_IN:
-			printf("Falta el parametro -in\n");
-			break;
-		case MISSING_P:
-			printf("Falta el parametro -p\n");
-			break;
-		case MISSING_OUT:
-			printf("Falta el parametro -out\n")
-			break;
-		case MISSING_STEG:
-			printf("Falta el parametro -steg\n")
-			break;
-		case MISSING_PASS:
-			printf("Falta la password\n");
-			break;
-		case MISSING_IN_FILE:
-		case MISSING_OUT_FILE:
-		case MISSING_P_FILE:
-			printf("No existe el archivo %s\n", param);
-			break;
-		case INVALID_P_FORMAT:
-			printf("Formato incorrecto. El parametro -p espera .wav \n");
-			break;
-		case INVALID_IN_FORMAT:
-			printf("Formato incorrecto. El parametro -in espera .bmp \n");
-			break;
-		case INVALID_OUT_FORMAT:
-			printf("Formato incorrecto. El parametro -p espera .wav \n");
-			break;
-		case INVALID_STEG:
-			printf("No es valido el algoritmo de esteganografiado \n");
-			break;
+	switch (code) {
+	case INC_PARAMC:
+		printf("Numero incorrecto de parametros\n");
+		break;
+	case INVALID_A:
+		printf("No es valida la encriptacion\n");
+		break;
+	case INVALID_M:
+		printf("No es valido el modo\n");
+		break;
+	case INVALID_OP:
+		printf("Operacion invalida\n");
+		break;
+	case MISSING_IN:
+		printf("Falta el parametro -in\n");
+		break;
+	case MISSING_P:
+		printf("Falta el parametro -p\n");
+		break;
+	case MISSING_OUT:
+		printf("Falta el parametro -out\n");
+		break;
+	case MISSING_STEG:
+		printf("Falta el parametro -steg\n");
+		break;
+	case MISSING_PASS:
+		printf("Falta la password\n");
+		break;
+	case MISSING_IN_FILE:
+	case MISSING_OUT_FILE:
+	case MISSING_P_FILE:
+		printf("No existe el archivo %s\n", param);
+		break;
+	case INVALID_P_FORMAT:
+		printf("Formato incorrecto. El parametro -p espera .wav \n");
+		break;
+	case INVALID_IN_FORMAT:
+		printf("Formato incorrecto. El parametro -in espera .bmp \n");
+		break;
+	case INVALID_OUT_FORMAT:
+		printf("Formato incorrecto. El parametro -p espera .wav \n");
+		break;
+	case INVALID_STEG:
+		printf("No es valido el algoritmo de esteganografiado \n");
+		break;
 	}
 	exit(-1);
 }

@@ -25,10 +25,11 @@
 #define INVALID_A           13
 #define INVALID_M           14
 #define MISSING_PASS        15
+#define INC_PARAMC			16
 
 #define NUM_ENC              4
 #define STRING_SIZE         10
 
-enum bool {
-  true = 1, false = 0;
-}
+typedef enum {
+	true, false
+} bool;
