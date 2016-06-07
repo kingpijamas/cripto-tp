@@ -47,6 +47,14 @@ int main(int argc, char **argv) {
 	char * steg_type, * enc_type, * mode, * pass;
 
 	parse_command(argv[1], &command);
+	switch (command) {
+	case EMBED:
+		expect_param_to_eq(argv[2], "-in", MISSING_IN);
+		break;
+	case EXTRACT:
+		expect_param_to_eq(argv[2], "-p", MISSING_P);
+		break;
+	}
 	expect_in_or_p(argv[2], command);
 
 	for (index = 3; index < argc; index++) {
