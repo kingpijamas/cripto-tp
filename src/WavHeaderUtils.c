@@ -5,11 +5,7 @@
 //  Created by Julieta Sal-lari on 25/5/16.
 //
 //
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include "WavHeaderUtils.h"
+#include "../include/WavHeaderUtils.h"
 
 unsigned int littleTobigEndian4(unsigned char buffer4[]){
     return buffer4[0] | (buffer4[1] << 8) | (buffer4[2] << 16) | (buffer4[3] << 24);

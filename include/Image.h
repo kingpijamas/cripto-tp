@@ -6,9 +6,10 @@
 //
 //
 
-#ifndef Image_h
-#define Image_h
+#ifndef IMAGE_H
+#define IMAGE_H
 
 #include <stdio.h>
+#include "WavHeaderUtils.h"
 
-#endif /* Image_h */
+#endif // IMAGE_H

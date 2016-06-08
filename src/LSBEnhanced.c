@@ -6,9 +6,7 @@
 //
 //
 
-#include "LSBEnhanced.h"
-
-typedef unsigned long DWORD;
+#include "../include/LSBEnhanced.h"
 
 int hideBitEnh(unsigned char *buffer, int size, unsigned char img_bit){
     if(buffer[size-1] < 254){

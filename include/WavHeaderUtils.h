@@ -6,12 +6,18 @@
 //
 //
 
-#ifndef WavHeaderUtils_h
-#define WavHeaderUtils_h
+#ifndef WAVHEADERUTILS_H
+#define WAVHEADERUTILS_H
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
-struct WAV_HEADER {
+typedef unsigned long DWORD;
+
+typedef struct WAV_HEADER {
     unsigned char riff[4];                      // RIFF string
     unsigned int overall_size   ;               // overall size of file in bytes
     unsigned char wave[4];                      // WAVE string
@@ -28,4 +34,4 @@ struct WAV_HEADER {
 };
 
 struct WAV_HEADER parseHeader(FILE * fileptr);
-#endif /* WavHeaderUtils_h */
+#endif // WAVHEADERUTILS_H

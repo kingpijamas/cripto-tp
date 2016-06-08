@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "../include/define.h"
+#include "../include/WavHeaderUtils.h"
 
 static int file_exists(char * path);
 static int streq(char * str1, char * str2);
@@ -202,13 +203,13 @@ int main(int argc, char **argv) {
 	//parametros recibidos
 
 	switch (command) {
-	case EMBED:
+	case EMBED: ;
 		// TODO
 		break;
-	case EXTRACT:
-		FILE *vector = fopen(p_path, "rb");
-		FILE *outfile = fopen(out_path, "wb");
-		FILE *img = fopen(in_path, "rb");
+	case EXTRACT: ;
+		FILE * vector = fopen(p_path, "rb");
+		FILE * outfile = fopen(out_path, "wb");
+		FILE * img = fopen(in_path, "rb");
 		struct WAV_HEADER header = parseHeader(vector);
 		fwrite(&header, 1, sizeof(header), outfile);
 		fseek(img, 0L, SEEK_END);
@@ -231,7 +232,7 @@ int main(int argc, char **argv) {
 			break;
 		}
 		return OK;
-	case ANALYZE:
+	case ANALYZE: ;
 		// TODO
 		break;
 	default:

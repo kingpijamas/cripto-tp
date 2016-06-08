@@ -6,8 +6,8 @@
 //
 //
 
-#ifndef LSB_h
-#define LSB_h
+#ifndef LSB_H
+#define LSB_H
 
 #include <stdio.h>
 typedef unsigned long DWORD;
@@ -18,4 +18,4 @@ void insertSizeLSB(FILE *fileptr, FILE *outfile, unsigned short int sample_size,
 DWORD getSizeLSB(FILE *fileptr, unsigned short int sample_size);
 
 void hideBit(unsigned char *buffer, int size, unsigned char img_bit);
-#endif /* LSB_h */
+#endif // LSB_H

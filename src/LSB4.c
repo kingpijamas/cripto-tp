@@ -1,7 +1,5 @@
 
-#include "LSB4.h"
-
-typedef unsigned long DWORD;
+#include "../include/LSB4.h"
 
 void hideBitsLSB4(unsigned char *buffer, int size, unsigned char img_bit[]){
     if(img_bit[0] == 1){

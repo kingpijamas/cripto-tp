@@ -6,9 +6,10 @@
 //
 //
 
-#ifndef LSBEnhanced_h
-#define LSBEnhanced_h
+#ifndef LSBENHANCED_H
+#define LSBENHANCED_H
 
 #include <stdio.h>
+#include "WavHeaderUtils.h"
 
-#endif /* LSBEnhanced_h */
+#endif // LSBENHANCED_H

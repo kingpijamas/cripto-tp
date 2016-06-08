@@ -6,9 +6,10 @@
 //
 //
 
-#ifndef LSB4_h
-#define LSB4_h
+#ifndef LSB4_H
+#define LSB4_H
 
 #include <stdio.h>
+#include "WavHeaderUtils.h"
 
-#endif /* LSB4_h */
+#endif // LSB4_H

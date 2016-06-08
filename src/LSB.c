@@ -1,7 +1,5 @@
 
-#include "LSB.h"
-
-typedef unsigned long DWORD;
+#include "../include/LSB.h"
 
 void hideBit(unsigned char *buffer, int size, unsigned char img_bit){
     buffer[size-1] = ((buffer[size-1]) & ~1) | img_bit;
