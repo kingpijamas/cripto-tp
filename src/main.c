@@ -73,7 +73,6 @@ int main(int argc, char **argv) {
 			}
 			param = argv[index];
 			expect_suffix(param, WAV_EXT, INVALID_OUT_FORMAT);
-			expect_file_to_exist(param, MISSING_OUT_FILE);
 			out_path = param;
 			break;
 		case steg:
@@ -123,75 +122,77 @@ int main(int argc, char **argv) {
 		default:
 			printf("Comando desconocido: \"%s\". IGNORADO \n", argv[index]);
 		}
-		if (command == NO_COMMAND) {
-			fail(INVALID_OP, NULL);
-		}
-//		if(command == STEGOANALYZE){
-//			stuff
-//			return, or fail
-//		}
-
-//		EMBED OR EXTRACT
-
-		if (command == embed) {
-			if (empty(p_path)) {
-				fail(INVALID_OP, NULL);
-			}
-		}
-		if (empty(in_path) || empty(out_path) || empty(steg_type)) {
-			fail(INVALID_OP, NULL);
-		}
-		if (empty(enc_type) != empty(mode) || empty(mode) != empty(password)) {
-			fail(INVALID_OP, NULL);
-		}
-
-		//TODO aca habria que llamar al metodo correspondiente con los
-		//parametros recibidos
-
-		switch (command) {
-		case EMBED:
-			;
-			// TODO
-			break;
-		case EXTRACT:
-			;
-			FILE * vector = fopen(p_path, "rb");
-			FILE * outfile = fopen(out_path, "wb");
-			FILE * img = fopen(in_path, "rb");
-			struct WAV_HEADER header = parseHeader(vector);
-			fwrite(&header, 1, sizeof(header), outfile);
-			fseek(img, 0L, SEEK_END);
-			DWORD sz = ftell(img);
-			sz += sizeof(DWORD);
-			rewind(img);
-			unsigned short int vector_size = header.bits_per_sample / 8;
-
-			unsigned char *bufferHide = (unsigned char *) malloc(sz);
-			memcpy(bufferHide, img, sz + 1);
-			fread(bufferHide, sz, 1, img);
-
-			if (strcmp(steg_type, "LSB1") == 0) {
-				hideLSB(vector, outfile, bufferHide, sz, vector_size);
-			} else if (strcmp(steg_type, "LSB4") == 0) {
-				hideLSB4(vector, outfile, bufferHide, sz, vector_size);
-			} else if (strcmp(steg_type, "LSBE") == 0) {
-				hideLSBEnh(vector, outfile, bufferHide, sz, vector_size);
-			} else {
-				break;
-			}
-			return OK;
-		case ANALYZE:
-			;
-			// TODO
-			break;
-		default:
-			printf("No command assigned!");
-			exit(1);
-			break;
-		}
-
-		return OK;
 	}
+
+	if (command == NO_COMMAND) {
+		fail(INVALID_OP, NULL);
+	}
+	//		if(command == STEGOANALYZE){
+	//			stuff
+	//			return, or fail
+	//		}
+
+	//		EMBED OR EXTRACT
+
+	if (command == embed) {
+		if (empty(p_path)) {
+			fail(INVALID_OP, NULL);
+		}
+	}
+	if (empty(in_path) || empty(out_path) || empty(steg_type)) {
+		fail(INVALID_OP, NULL);
+	}
+	if (empty(enc_type) != empty(mode) || empty(mode) != empty(password)) {
+		fail(INVALID_OP, NULL);
+	}
+
+	printf("Parameters OK!\n");
+
+	//TODO aca habria que llamar al metodo correspondiente con los
+	//parametros recibidos
+
+	switch (command) {
+	case EMBED:
+		;
+		FILE * vector = fopen(p_path, "rb");
+		FILE * outfile = fopen(out_path, "wb");
+		FILE * img = fopen(in_path, "rb");
+		struct WAV_HEADER header = parseHeader(vector);
+		fwrite(&header, 1, sizeof(header), outfile);
+		fseek(img, 0L, SEEK_END);
+		DWORD sz = ftell(img);
+		sz += sizeof(DWORD);
+		rewind(img);
+		unsigned short int vector_size = header.bits_per_sample / 8;
+
+		unsigned char *bufferHide = (unsigned char *) malloc(sz);
+		memcpy(bufferHide, img, sz + 1);
+		fread(bufferHide, sz, 1, img);
+
+		if (strcmp(steg_type, "LSB1") == 0) {
+			hideLSB(vector, outfile, bufferHide, sz, vector_size);
+		} else if (strcmp(steg_type, "LSB4") == 0) {
+			hideLSB4(vector, outfile, bufferHide, sz, vector_size);
+		} else if (strcmp(steg_type, "LSBE") == 0) {
+			hideLSBEnh(vector, outfile, bufferHide, sz, vector_size);
+		} else {
+			break;
+		}
+		return OK;
+	case EXTRACT:
+		;
+		break;
+	case ANALYZE:
+		;
+		// TODO
+		break;
+	default:
+		printf("No command assigned!");
+		exit(1);
+		break;
+	}
+
+	return OK;
 }
 
 arg parseArg(char * argument) {
@@ -237,7 +238,7 @@ int streq(char * str1, char * str2) {
 }
 
 int empty(char * str) {
-	return *str == '\0';
+	return str == 0 || *str == '\0';
 }
 
 int has_suffix(char * str, char * suffix) {
