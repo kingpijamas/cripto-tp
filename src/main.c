@@ -4,6 +4,10 @@
 #include <unistd.h>
 #include "../include/define.h"
 #include "../include/WavHeaderUtils.h"
+#include "../include/LSB4.h"
+#include "../include/LSB.h"
+#include "../include/LSBEnhanced.h"
+
 
 static int file_exists(char * path);
 static int streq(char * str1, char * str2);
