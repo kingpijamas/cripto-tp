@@ -9,8 +9,7 @@
 #ifndef LSB4_H
 #define LSB4_H
 
-#include <stdio.h>
-#include "WavHeaderUtils.h"
+#include "define.h"
 
 void hideLSB4(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size);
 

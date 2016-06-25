@@ -9,8 +9,7 @@
 #ifndef LSBENHANCED_H
 #define LSBENHANCED_H
 
-#include <stdio.h>
-#include "WavHeaderUtils.h"
+#include "define.h"
 
 void hideLSBEnh(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size);
 

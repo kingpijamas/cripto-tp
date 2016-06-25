@@ -1,29 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include "../include/Define.h"
-#include "../include/LSB1.h"
-#include "../include/WavHeaderUtils.h"
-#include "../include/LSB4.h"
-#include "../include/LSBEnhanced.h"
-
-static int fileExists(char * path);
-static int streq(char * str1, char * str2);
-static int empty(char * str);
-static int validStegAlgorithm(char * algorithm);
-static int validEncryption(char * encryption);
-static int validMode(char * mode);
-static int hasSuffix(char * str, char * suffix);
-
-static arg parseArg(char * argument);
-
-static void expectFileToExist(char * path, error error_code);
-static void expectSuffix(char * param, char * suffix, error error_code);
-
-static void fail(error code, char * param);
-
-static void print_help();
+#include "../include/main.h"
 
 int main(int argc, char **argv) {
 	printf("Antes del help");
@@ -39,7 +14,9 @@ int main(int argc, char **argv) {
 	char * p_path; 	//archivo que sera el portador
 	char * out_path; //archivo de salida
 	//algoritmo de esteganografiado, encriptacion, modo y password
-	char * steg_type, *enc_type, *mode, *password;
+	char * steg_type, *password;
+	enc_type enc_type = UNKNOWN_ENC_TYPE;
+	enc_mode enc_mode = UNKNOWN_ENC_MODE;
 	char * param;
 	for (index = 1; index < argc; index++) {
 		arg argument = parseArg(argv[index]);
@@ -77,7 +54,7 @@ int main(int argc, char **argv) {
 				fail(INC_PARAMC, NULL);
 			}
 			param = argv[index];
-			if(command == EMBED){
+			if (command == EMBED) {
 				expectSuffix(param, WAV_EXT, INVALID_OUT_FORMAT);
 			}
 			out_path = param;
@@ -98,22 +75,14 @@ int main(int argc, char **argv) {
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
-			param = argv[index];
-			if (!validEncryption(param)) {
-				fail(INVALID_A, param);
-			}
-			enc_type = param;
+			enc_type = parse_enc_type(argv[index]);
 			break;
 		when(M_ARG)
 			printf("M arg");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
-			param = argv[index];
-			if (!validMode(param)) {
-				fail(INVALID_M, param);
-			}
-			mode = param;
+			enc_mode = parse_enc_mode(argv[index]);
 			break;
 		when(PASS_ARG)
 			printf("Pass Arg");
@@ -137,7 +106,7 @@ int main(int argc, char **argv) {
 	}
 	printf("Parameters OK!\n");
 
-	FILE * vector, * outfile, * payload;
+	FILE * vector, *outfile, *payload;
 	WAV_HEADER header;
 	DWORD payload_size;
 
@@ -147,13 +116,14 @@ int main(int argc, char **argv) {
 	when(EMBED)
 		printf("Embed entered");
 		if (empty(in_path)) {
-				fail(INVALID_OP, NULL);
+			fail(INVALID_OP, NULL);
 		}
 		if (empty(p_path) || empty(out_path) || empty(steg_type)) {
-				fail(INVALID_OP, NULL);
+			fail(INVALID_OP, NULL);
 		}
-		if (empty(enc_type) != empty(mode) || empty(mode) != empty(password)) {
-				fail(INVALID_OP, NULL);
+		if ((enc_type == UNKNOWN_ENC_TYPE) != (enc_mode == UNKNOWN_ENC_MODE)
+				|| (enc_mode == UNKNOWN_ENC_MODE) != empty(password)) {
+			fail(INVALID_OP, NULL);
 		}
 		vector = fopen(p_path, "rb");
 		outfile = fopen(out_path, "wb");
@@ -173,20 +143,21 @@ int main(int argc, char **argv) {
 		fread(buffer_hide, payload_size, 1, payload);
 
 		if (streq(steg_type, "LSB1")) {
-				hideLSB1(vector, outfile, buffer_hide, payload_size, vector_size);
+			hideLSB1(vector, outfile, buffer_hide, payload_size, vector_size);
 		} else if (streq(steg_type, "LSB4")) {
-				hideLSB4(vector, outfile, buffer_hide, payload_size, vector_size);
+			hideLSB4(vector, outfile, buffer_hide, payload_size, vector_size);
 		} else if (streq(steg_type, "LSBE")) {
-				hideLSBEnh(vector, outfile, buffer_hide, payload_size, vector_size);
+			hideLSBEnh(vector, outfile, buffer_hide, payload_size, vector_size);
 		}
 		return SYS_OK;
 	when(EXTRACT)
 		printf("Valida");
 		if (empty(p_path) || empty(out_path) || empty(steg_type)) {
-				fail(INVALID_OP, NULL);
+			fail(INVALID_OP, NULL);
 		}
-		if (empty(enc_type) != empty(mode) || empty(mode) != empty(password)) {
-				fail(INVALID_OP, NULL);
+		if ((enc_type == UNKNOWN_ENC_TYPE) != (enc_mode == UNKNOWN_ENC_MODE)
+				|| (enc_mode == UNKNOWN_ENC_MODE) != empty(password)) {
+			fail(INVALID_OP, NULL);
 		}
 		printf("Empiezo");
 		vector = fopen(p_path, "rb");
@@ -195,11 +166,11 @@ int main(int argc, char **argv) {
 		printf("Ya parseó");
 		int bytes_per_sample = header.bits_per_sample / 8;
 		if (streq(steg_type, "LSB1")) {
-				recoverLSB1(vector, outfile, bytes_per_sample);
+			recoverLSB1(vector, outfile, bytes_per_sample);
 		} else if (streq(steg_type, "LSB4")) {
-				recoverLSB4(vector, outfile, bytes_per_sample);
+			recoverLSB4(vector, outfile, bytes_per_sample);
 		} else if (streq(steg_type, "LSBE")) {
-				recoverLSBEnh(vector, outfile, bytes_per_sample);
+			recoverLSBEnh(vector, outfile, bytes_per_sample);
 		}
 		return SYS_OK;
 	when(ANALYZE)
@@ -211,6 +182,40 @@ int main(int argc, char **argv) {
 		break;
 	}
 	return SYS_OK;
+}
+
+enc_type parse_enc_type(char * type) {
+	if (streq(type, "aes128")) {
+		return AES128;
+	}
+	if (streq(type, "aes192")) {
+		return AES192;
+	}
+	if (streq(type, "aes256")) {
+		return AES256;
+	}
+	if (streq(type, "des")) {
+		return DES;
+	}
+	fail(INVALID_A, type);
+	exit(-1);
+}
+
+enc_mode parse_enc_mode(char * mode) {
+	if (streq(mode, "ecb")) {
+		return ECB;
+	}
+	if (streq(mode, "cfb")) {
+		return CFB;
+	}
+	if (streq(mode, "ofb")) {
+		return OFB;
+	}
+	if (streq(mode, "cbc")) {
+		return CBC;
+	}
+	fail(INVALID_M, mode);
+	exit(-1);
 }
 
 arg parseArg(char * argument) {
@@ -282,15 +287,6 @@ int hasSuffix(char * str, char * suffix) {
 
 int validStegAlgorithm(char * algorithm) {
 	return strcmp(algorithm, "LSB1") == 0 || strcmp(algorithm, "LSB4") == 0 || strcmp(algorithm, "LSBE") == 0;
-}
-
-int validEncryption(char * encryption) {
-	return strcmp(encryption, "aes128") == 0 || strcmp(encryption, "aes192") == 0 || strcmp(encryption, "aes256") == 0
-			|| strcmp(encryption, "des") == 0;
-}
-
-int validMode(char * mode) {
-	return strcmp(mode, "ecb") == 0 || strcmp(mode, "cfb") == 0 || strcmp(mode, "ofb") == 0 || strcmp(mode, "cbc") == 0;
 }
 
 void print_help() {

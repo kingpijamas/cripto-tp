@@ -6,15 +6,12 @@
 //
 //
 
-#ifndef LSB_H
-#define LSB_H
+#ifndef LSB1_H
+#define LSB1_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-typedef unsigned long DWORD;
+#include "define.h"
 
 void hideLSB1(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size);
 void recoverLSB1(FILE *fileptr, FILE *img_out, unsigned short int sample_size);
 
-#endif // LSB_H
+#endif // LSB1_H
