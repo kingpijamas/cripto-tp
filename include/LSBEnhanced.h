@@ -13,4 +13,7 @@
 #include "WavHeaderUtils.h"
 
 void hideLSBEnh(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size);
+
+void recoverLSBEnh(FILE *fileptr, FILE *img_out, unsigned short int sample_size);
+
 #endif // LSBENHANCED_H

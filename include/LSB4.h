@@ -13,4 +13,7 @@
 #include "WavHeaderUtils.h"
 
 void hideLSB4(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size);
+
+void recoverLSB4(FILE *fileptr, FILE *img_out, unsigned short int sample_size);
+
 #endif // LSB4_H

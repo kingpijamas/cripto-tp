@@ -37,3 +37,4 @@
 .settings
 
 *.DS_STORE/
+/Debug/

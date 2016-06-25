@@ -36,3 +36,5 @@ typedef enum {
 typedef enum {
 	true, false
 } bool;
+
+#define when(name) case(name):;

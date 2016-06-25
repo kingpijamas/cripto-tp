@@ -1,0 +1,3 @@
+Limpiar variables sin usar
+Cambiar "imagen" a "payload"
+Ver que cree los files donde dumpea

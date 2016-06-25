@@ -1,12 +1,12 @@
 
-#include "../include/LSB.h"
+#include "../include/LSB1.h"
 
 void hideBit(unsigned char *buffer, int size, unsigned char img_bit){
     buffer[size-1] = ((buffer[size-1]) & ~1) | img_bit;
     return;
 }
 
-DWORD getSizeLSB(FILE *fileptr, unsigned short int sample_size){
+DWORD getSizeLSB1(FILE *fileptr, unsigned short int sample_size){
     unsigned char buffer[sample_size];
     int dword_size = sizeof(DWORD);
 
@@ -31,7 +31,7 @@ DWORD getSizeLSB(FILE *fileptr, unsigned short int sample_size){
     return size;
 }
 
-void insertSizeLSB(FILE *fileptr, FILE *outfile, unsigned short int sample_size, DWORD size){
+void insertSizeLSB1(FILE *fileptr, FILE *outfile, unsigned short int sample_size, DWORD size){
     //en cuantos bytes se guarda el tamaño
     int dword_size = sizeof(size);
 
@@ -64,7 +64,7 @@ void insertSizeLSB(FILE *fileptr, FILE *outfile, unsigned short int sample_size,
     free(buffer);
 }
 
-void hideLSB(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size){
+void hideLSB1(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size){
     int read = 0;
     int write = 0;
     int img_read = 0;
@@ -74,7 +74,7 @@ void hideLSB(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigne
     int index = 0;
 
     //inserto el size
-    insertSizeLSB(fileptr, outfile, sample_size, sz);
+    insertSizeLSB1(fileptr, outfile, sample_size, sz);
 
     //leo el primer B de la imagen
     //img_read = fread(img_buffer, 1, 1, img);
@@ -98,7 +98,7 @@ void hideLSB(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigne
     }
 }
 
-void recoverLSB(FILE *fileptr, FILE *img_out, unsigned short int sample_size){
+void recoverLSB1(FILE *fileptr, FILE *img_out, unsigned short int sample_size){
     int read = 0;
     int img_read = 0;
     //unsigned short int sample_size = header.bits_per_sample / 8;
@@ -109,7 +109,7 @@ void recoverLSB(FILE *fileptr, FILE *img_out, unsigned short int sample_size){
 
     img_buffer[0] = 0;
 
-    DWORD size = getSizeLSB(fileptr, sample_size);
+    DWORD size = getSizeLSB1(fileptr, sample_size);
 
     unsigned char *img_buffer_file = (unsigned char *)malloc(size);
 

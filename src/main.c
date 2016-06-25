@@ -3,11 +3,10 @@
 #include <string.h>
 #include <unistd.h>
 #include "../include/Define.h"
+#include "../include/LSB1.h"
 #include "../include/WavHeaderUtils.h"
 #include "../include/LSB4.h"
-#include "../include/LSB.h"
 #include "../include/LSBEnhanced.h"
-
 
 static int fileExists(char * path);
 static int streq(char * str1, char * str2);
@@ -27,10 +26,12 @@ static void fail(error code, char * param);
 static void print_help();
 
 int main(int argc, char **argv) {
+	printf("Antes del help");
 	if (argc == 1 || (streq(argv[1], "-h") || streq(argv[1], "--help"))) {
 		print_help();
 		return SYS_OK;
 	}
+	printf("dps del help");
 
 	comm command = NO_COMMAND;
 	int index;
@@ -43,16 +44,16 @@ int main(int argc, char **argv) {
 	for (index = 1; index < argc; index++) {
 		arg argument = parseArg(argv[index]);
 		switch (argument) {
-		case EMBED_ARG:
-			;
+		when(EMBED_ARG)
+			printf("Embed");
 			command = EMBED;
 			break;
-		case EXTRACT_ARG:
-			;
+		when(EXTRACT_ARG)
+			printf("Extract");
 			command = EXTRACT;
 			break;
-		case IN_ARG:
-			;
+		when(IN_ARG)
+			printf("In");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -60,8 +61,8 @@ int main(int argc, char **argv) {
 			expectFileToExist(param, MISSING_IN_FILE);
 			in_path = param;
 			break;
-		case P_ARG:
-			;
+		when(P_ARG)
+			printf("P arg");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -70,17 +71,19 @@ int main(int argc, char **argv) {
 			expectFileToExist(param, MISSING_P_FILE);
 			p_path = param;
 			break;
-		case OUT_ARG:
-			;
+		when(OUT_ARG)
+			printf("Out arg");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
 			param = argv[index];
-			expectSuffix(param, WAV_EXT, INVALID_OUT_FORMAT);
+			if(command == EMBED){
+				expectSuffix(param, WAV_EXT, INVALID_OUT_FORMAT);
+			}
 			out_path = param;
 			break;
-		case STEG_ARG:
-			;
+		when(STEG_ARG)
+			printf("Steg arg");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -90,8 +93,8 @@ int main(int argc, char **argv) {
 			}
 			steg_type = param;
 			break;
-		case A_ARG:
-			;
+		when(A_ARG)
+			printf("A arg");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -101,8 +104,8 @@ int main(int argc, char **argv) {
 			}
 			enc_type = param;
 			break;
-		case M_ARG:
-			;
+		when(M_ARG)
+			printf("M arg");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -112,8 +115,8 @@ int main(int argc, char **argv) {
 			}
 			mode = param;
 			break;
-		case PASS_ARG:
-			;
+		when(PASS_ARG)
+			printf("Pass Arg");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -128,66 +131,77 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	printf("Command es %d ", command);
 	if (command == NO_COMMAND) {
 		fail(INVALID_OP, NULL);
 	}
-	//		if(command == STEGOANALYZE){
-	//			stuff
-	//			return, or fail
-	//		}
+	printf("Parameters OK!\n");
 
-	//		EMBED OR EXTRACT
+	FILE * vector, * outfile, * payload;
+	WAV_HEADER header;
+	DWORD payload_size;
 
-	if (command == EMBED_ARG) {
-		if (empty(p_path)) {
-			fail(INVALID_OP, NULL);
-		}
-	}
-	if (empty(in_path) || empty(out_path) || empty(steg_type)) {
-		fail(INVALID_OP, NULL);
-	}
-	if (empty(enc_type) != empty(mode) || empty(mode) != empty(password)) {
-		fail(INVALID_OP, NULL);
-	}
-
-	printf("Parameters SYS_OK!\n");
-
-	//TODO aca habria que llamar al metodo correspondiente con los
-	//parametros recibidos
+	printf("Antes del switch\n");
 
 	switch (command) {
-	case EMBED:
-		;
-		FILE * vector = fopen(p_path, "rb");
-		FILE * outfile = fopen(out_path, "wb");
-		FILE * img = fopen(in_path, "rb");
-		struct WAV_HEADER header = parseHeader(vector);
+	when(EMBED)
+		printf("Embed entered");
+		if (empty(in_path)) {
+			fail(INVALID_OP, NULL);
+		}
+		if (empty(p_path) || empty(out_path) || empty(steg_type)) {
+			fail(INVALID_OP, NULL);
+		}
+		if (empty(enc_type) != empty(mode) || empty(mode) != empty(password)) {
+			fail(INVALID_OP, NULL);
+		}
+		vector = fopen(p_path, "rb");
+		outfile = fopen(out_path, "wb");
+		payload = fopen(in_path, "rb");
+		header = parseHeader(vector);
 		fwrite(&header, 1, sizeof(header), outfile);
-		fseek(img, 0L, SEEK_END);
-		DWORD sz = ftell(img);
-		sz += sizeof(DWORD);
-		rewind(img);
+
+		// Gets payload's size
+		fseek(payload, 0L, SEEK_END);
+		payload_size = ftell(payload);
+		payload_size += sizeof(DWORD);
+		rewind(payload);
+
 		unsigned short int vector_size = header.bits_per_sample / 8;
+		unsigned char * buffer_hide = (unsigned char *) malloc(payload_size);
+		// memcpy(buffer_hide, payload, payload_size + 1);
+		fread(buffer_hide, payload_size, 1, payload);
 
-		unsigned char *bufferHide = (unsigned char *) malloc(sz);
-		memcpy(bufferHide, img, sz + 1);
-		fread(bufferHide, sz, 1, img);
-
-		if (strcmp(steg_type, "LSB1") == 0) {
-			hideLSB(vector, outfile, bufferHide, sz, vector_size);
-		} else if (strcmp(steg_type, "LSB4") == 0) {
-			hideLSB4(vector, outfile, bufferHide, sz, vector_size);
-		} else if (strcmp(steg_type, "LSBE") == 0) {
-			hideLSBEnh(vector, outfile, bufferHide, sz, vector_size);
-		} else {
-			break;
+		if (streq(steg_type, "LSB1")) {
+			hideLSB1(vector, outfile, buffer_hide, payload_size, vector_size);
+		} else if (streq(steg_type, "LSB4")) {
+			hideLSB4(vector, outfile, buffer_hide, payload_size, vector_size);
+		} else if (streq(steg_type, "LSBE")) {
+			hideLSBEnh(vector, outfile, buffer_hide, payload_size, vector_size);
 		}
 		return SYS_OK;
-	case EXTRACT:
-		;
-		break;
-	case ANALYZE:
-		;
+	when(EXTRACT)
+		printf("Valida");
+		if (empty(p_path) || empty(out_path) || empty(steg_type)) {
+			fail(INVALID_OP, NULL);
+		}
+		if (empty(enc_type) != empty(mode) || empty(mode) != empty(password)) {
+			fail(INVALID_OP, NULL);
+		}
+		printf("Empiezo");
+		vector = fopen(p_path, "rb");
+		outfile = fopen(out_path, "wb");
+		header = parseHeader(vector);
+		printf("Ya parseó");
+		if (streq(steg_type, "LSB1")) {
+			recoverLSB1(vector, outfile, header.bits_per_sample);
+		} else if (streq(steg_type, "LSB4")) {
+			recoverLSB4(vector, outfile, header.bits_per_sample);
+		} else if (streq(steg_type, "LSBE")) {
+			recoverLSBEnh(vector, outfile, header.bits_per_sample);
+		}
+		return SYS_OK;
+	when(ANALYZE)
 		// TODO
 		break;
 	default:
@@ -195,7 +209,6 @@ int main(int argc, char **argv) {
 		exit(1);
 		break;
 	}
-
 	return SYS_OK;
 }
 
@@ -262,7 +275,7 @@ int hasSuffix(char * str, char * suffix) {
 		return false;
 	}
 
-	int suff_start = str_len - suff_len - 1;
+	int suff_start = str_len - suff_len;
 	return streq(str + suff_start, suffix);
 }
 
