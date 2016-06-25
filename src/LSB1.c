@@ -25,37 +25,19 @@ DWORD getSizeLSB1(FILE * file, unsigned short int sample_bytes){
     return size;
 }
 
-void insertSizeLSB1(FILE *fileptr, FILE *outfile, unsigned short int sample_size, DWORD size){
-    //en cuantos bytes se guarda el tamaño
-    int dword_size = sizeof(size);
-
-    unsigned char *bytes = (unsigned char*)malloc(dword_size);
-    memcpy(bytes, &size, dword_size);
-
-    int bits_read = 0;
-    int read = 0;
-    unsigned char byte = bytes[0];  //agarro el primer byte del tamaño
+void insertSizeLSB1(FILE *fileptr, FILE *outfile, unsigned short int sample_size, DWORD payload_size){
+    //en cuantos bits se guarda el tamaño
+    int dword_bits = sizeof(payload_size) * 8;
     unsigned char bit;
+    int read = 0;
     unsigned char *buffer = (unsigned char *)malloc(sample_size);
 
-    int bytes_read = 0;
-    while (bytes_read < dword_size) {
+    for(int bits_written = 0; bits_written < dword_bits; bits_written++){
         read = fread(buffer, 1, sample_size, fileptr);
-        //agarro el bit payload
-        bit = (byte >> (7 - bits_read)) & 0x01;
-        //cambio el ultimo bit del buffer de lectura
-        hideBit(buffer, read, bit);
-        bits_read++;
-
-        fwrite(buffer, 1, read, outfile);			// Writing read data into output file
-
-        if (bits_read >= 8) { //si ya lei todo un byte agarro el que sigue
-            bits_read = 0;
-            bytes_read++;
-            byte = bytes[bytes_read];
-        }
+    	bit = (payload_size >> (dword_bits - bits_written - 1)) & 0x01;
+    	hideBit(buffer, read, bit);
+    	fwrite(buffer, 1, read, outfile);
     }
-    free(bytes);
     free(buffer);
 }
 
