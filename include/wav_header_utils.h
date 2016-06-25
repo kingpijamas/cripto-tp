@@ -1,5 +1,5 @@
 //
-//  WavHeaderUtils.h
+//  wav_header_utils.h
 //
 //
 //  Created by Julieta Sal-lari on 25/5/16.

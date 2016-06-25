@@ -10,6 +10,6 @@
 #define IMAGE_H
 
 #include <stdio.h>
-#include "WavHeaderUtils.h"
+#include "wav_header_utils.h"
 
 #endif // IMAGE_H

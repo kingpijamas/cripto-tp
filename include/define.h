@@ -1,4 +1,4 @@
-//  WavHeaderUtils.h
+//  wav_header_utils.h
 
 #ifndef DEFINE_H
 #define DEFINE_H
@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "WavHeaderUtils.h"
+#include "wav_header_utils.h"
 
 typedef enum {
 	true, false

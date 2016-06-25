@@ -1,6 +1,6 @@
 //
-//  LSB4.h
-//  
+//  lsb4.h
+//
 //
 //  Created by Julieta Sal-lari on 29/5/16.
 //

@@ -1,8 +1,8 @@
-#include "../include/LSB1.h"
+#include "../include/lsb1.h"
 
 static void hideBit(unsigned char *buffer, int size, unsigned char payload_bit);
-static DWORD getSizeLSB1(FILE *fileptr, unsigned short int sample_size);
-static void insertSizeLSB1(FILE *fileptr, FILE *outfile, unsigned short int sample_size, DWORD size);
+static DWORD getSizeLSB1(FILE * file, unsigned short int sample_size);
+static void insertSizeLSB1(FILE * file, FILE * outfile, unsigned short int sample_size, DWORD size);
 static unsigned char lsb(unsigned char * buffer, int buffer_size);
 
 unsigned char lsb(unsigned char * buffer, int buffer_size) {
@@ -25,7 +25,7 @@ DWORD getSizeLSB1(FILE * file, unsigned short int sample_bytes){
     return size;
 }
 
-void insertSizeLSB1(FILE *fileptr, FILE *outfile, unsigned short int sample_size, DWORD payload_size){
+void insertSizeLSB1(FILE * file, FILE * outfile, unsigned short int sample_size, DWORD payload_size){
     //en cuantos bits se guarda el tamaño
     int dword_bits = sizeof(payload_size) * 8;
     unsigned char bit;
@@ -33,7 +33,7 @@ void insertSizeLSB1(FILE *fileptr, FILE *outfile, unsigned short int sample_size
     unsigned char *buffer = (unsigned char *)malloc(sample_size);
 
     for(int bits_written = 0; bits_written < dword_bits; bits_written++){
-        read = fread(buffer, 1, sample_size, fileptr);
+      read = fread(buffer, 1, sample_size, file);
     	bit = (payload_size >> (dword_bits - bits_written - 1)) & 0x01;
     	hideBit(buffer, read, bit);
     	fwrite(buffer, 1, read, outfile);
@@ -43,19 +43,13 @@ void insertSizeLSB1(FILE *fileptr, FILE *outfile, unsigned short int sample_size
 
 void hideLSB1(FILE * vector, FILE * out_file, unsigned char * payload, DWORD payload_size, unsigned short int sample_size){
     int read = 0;
-    // int write = 0;
     unsigned int payload_read = 0;
-    unsigned char *buffer = (unsigned char *)malloc(sample_size);   //leo de a samples
-    // unsigned char *payload_buffer = (unsigned char *)malloc(1);         //leo de a un byte
+    unsigned char * buffer = (unsigned char *) malloc(sample_size);   //leo de a samples
     unsigned char bit;
     int bits_read = 0;
 
     //inserto el size
     insertSizeLSB1(vector, out_file, sample_size, payload_size);
-
-    //leo el primer B de la imagen
-    //payload_read = fread(payload_buffer, 1, 1, payload);
-    // unsigned char payloadByte = 0;
 
     //leo un sample a la vez
     while((read = fread(buffer, 1, sample_size, vector)) > 0) {
@@ -71,7 +65,7 @@ void hideLSB1(FILE * vector, FILE * out_file, unsigned char * payload, DWORD pay
             hideBit(buffer, read, bit);
             bits_read++;
         }
-        fwrite(buffer, 1, read, out_file);			// Writing read data into output file
+        fwrite(buffer, 1, read, out_file); // Writing read data into output file
     }
 }
 

@@ -1,5 +1,5 @@
 
-#include "../include/LSB4.h"
+#include "../include/lsb4.h"
 
 void hideBitsLSB4(unsigned char *buffer, int size, unsigned char img_bit[]) {
     if (img_bit[0] == 1) {

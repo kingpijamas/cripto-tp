@@ -5,7 +5,7 @@
 //  Created by Julieta Sal-lari on 28/5/16.
 //
 //
-#include "../include/Image.h"
+#include "../include/image.h"
 
 //void recover(){
 //    FILE *fileptr = fopen("../../outfile.wav", "rb");  // Open the file in binary mode

@@ -3,11 +3,13 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "../include/LSB1.h"
-#include "../include/LSB4.h"
-#include "../include/LSBEnhanced.h"
-#include "../include/crypt.h"
+#include "crypt.h"
 #include "define.h"
+#include "lsb1.h"
+#include "lsb4.h"
+#include "lsb_enhanced.h"
+#include "marshall.h"
+#include "wav_header_utils.h"
 
 #define WAV_EXT ".wav"
 #define BMP_EXT ".bmp"
