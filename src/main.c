@@ -9,25 +9,25 @@
 #include "../include/LSBEnhanced.h"
 
 
-static int file_exists(char * path);
+static int fileExists(char * path);
 static int streq(char * str1, char * str2);
 static int empty(char * str);
-static int valid_steg_algorithm(char * algorithm);
-static int valid_encryption(char * encryption);
-static int valid_mode(char * mode);
-static int has_suffix(char * str, char * suffix);
+static int validStegAlgorithm(char * algorithm);
+static int validEncryption(char * encryption);
+static int validMode(char * mode);
+static int hasSuffix(char * str, char * suffix);
 
 static arg parseArg(char * argument);
 
-static void expect_file_to_exist(char * path, error error_code);
-static void expect_suffix(char * param, char * suffix, error error_code);
+static void expectFileToExist(char * path, error error_code);
+static void expectSuffix(char * param, char * suffix, error error_code);
 
 static void fail(error code, char * param);
 
 static void print_help();
 
 int main(int argc, char **argv) {
-	if (argc > 1 && streq(argv[1], "-h")) {
+	if (argc == 1 || (streq(argv[1], "-h") || streq(argv[1], "--help"))) {
 		print_help();
 		return OK;
 	}
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 				fail(INC_PARAMC, NULL);
 			}
 			param = argv[index];
-			expect_file_to_exist(param, MISSING_IN_FILE);
+			expectFileToExist(param, MISSING_IN_FILE);
 			in_path = param;
 			break;
 		case p:
@@ -66,8 +66,8 @@ int main(int argc, char **argv) {
 				fail(INC_PARAMC, NULL);
 			}
 			param = argv[index];
-			expect_suffix(param, WAV_EXT, INVALID_P_FORMAT);
-			expect_file_to_exist(param, MISSING_P_FILE);
+			expectSuffix(param, WAV_EXT, INVALID_P_FORMAT);
+			expectFileToExist(param, MISSING_P_FILE);
 			p_path = param;
 			break;
 		case out:
@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 				fail(INC_PARAMC, NULL);
 			}
 			param = argv[index];
-			expect_suffix(param, WAV_EXT, INVALID_OUT_FORMAT);
+			expectSuffix(param, WAV_EXT, INVALID_OUT_FORMAT);
 			out_path = param;
 			break;
 		case steg:
@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
 				fail(INC_PARAMC, NULL);
 			}
 			param = argv[index];
-			if (!valid_steg_algorithm(param)) {
+			if (!validStegAlgorithm(param)) {
 				fail(INVALID_STEG, param);
 			}
 			steg_type = param;
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 				fail(INC_PARAMC, NULL);
 			}
 			param = argv[index];
-			if (!valid_encryption(param)) {
+			if (!validEncryption(param)) {
 				fail(INVALID_A, param);
 			}
 			enc_type = param;
@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
 				fail(INC_PARAMC, NULL);
 			}
 			param = argv[index];
-			if (!valid_mode(param)) {
+			if (!validMode(param)) {
 				fail(INVALID_M, param);
 			}
 			mode = param;
@@ -200,40 +200,49 @@ int main(int argc, char **argv) {
 }
 
 arg parseArg(char * argument) {
-	if (streq(argument, "-embed"))
+	if (streq(argument, "-embed")) {
 		return embed;
-	if (streq(argument, "-extract"))
+	}
+	if (streq(argument, "-extract")) {
 		return extract;
-	if (streq(argument, "-in"))
+	}
+	if (streq(argument, "-in")) {
 		return in;
-	if (streq(argument, "-p"))
+	}
+	if (streq(argument, "-p")) {
 		return p;
-	if (streq(argument, "-out"))
+	}
+	if (streq(argument, "-out")) {
 		return out;
-	if (streq(argument, "-steg"))
+	}
+	if (streq(argument, "-steg")) {
 		return steg;
-	if (streq(argument, "-a"))
+	}
+	if (streq(argument, "-a")) {
 		return a;
-	if (streq(argument, "-m"))
+	}
+	if (streq(argument, "-m")) {
 		return m;
-	if (streq(argument, "-pass"))
+	}
+	if (streq(argument, "-pass")) {
 		return pass;
+	}
 	return unknown;
 }
 
-void expect_file_to_exist(char * path, error error_code) {
-	if (!file_exists(path)) {
+void expectFileToExist(char * path, error error_code) {
+	if (!fileExists(path)) {
 		fail(error_code, NULL);
 	}
 }
 
-void expect_suffix(char * param, char * suffix, error error_code) {
-	if (!has_suffix(param, suffix)) {
+void expectSuffix(char * param, char * suffix, error error_code) {
+	if (!hasSuffix(param, suffix)) {
 		fail(error_code, param);
 	}
 }
 
-int file_exists(char * path) {
+int fileExists(char * path) {
 	return access(path, F_OK) != -1;
 }
 
@@ -245,25 +254,25 @@ int empty(char * str) {
 	return str == 0 || *str == '\0';
 }
 
-int has_suffix(char * str, char * suffix) {
+int hasSuffix(char * str, char * suffix) {
 	char * last_appearance = strrchr(str, suffix);
 	if (last_appearance == NULL || strlen(last_appearance) > strlen(suffix)) {
 		// 'suffix' is not actually a suffix, just a substring
 		return false;
 	}
-	return last_appearance;
+	return (int) last_appearance;
 }
 
-int valid_steg_algorithm(char * algorithm) {
+int validStegAlgorithm(char * algorithm) {
 	return strcmp(algorithm, "LSB1") == 0 || strcmp(algorithm, "LSB4") == 0 || strcmp(algorithm, "LSBE") == 0;
 }
 
-int valid_encryption(char * encryption) {
+int validEncryption(char * encryption) {
 	return strcmp(encryption, "aes128") == 0 || strcmp(encryption, "aes192") == 0 || strcmp(encryption, "aes256") == 0
 			|| strcmp(encryption, "des") == 0;
 }
 
-int valid_mode(char * mode) {
+int validMode(char * mode) {
 	return strcmp(mode, "ecb") == 0 || strcmp(mode, "cfb") == 0 || strcmp(mode, "ofb") == 0 || strcmp(mode, "cbc") == 0;
 }
 

@@ -1,6 +1,6 @@
 //
 //  Image.c
-//  
+//
 //
 //  Created by Julieta Sal-lari on 28/5/16.
 //
@@ -72,13 +72,13 @@
         printf("../../fileptr is NULL \n");
         return 0;
     }
-    
+
     FILE *img_out = fopen("img_out.png", "wb");  // Open the file in binary mode
     if(img_out == NULL){
         printf("../../fileptr is NULL \n");
         return 0;
     }
-    
+
     int read = 0;
     int img_read = 0;
     unsigned char buffer[1];
@@ -98,14 +98,14 @@
         }
         if (img_read > 0) {
             bit = (buffer[0] >> index) & 1;
-            
+
         }
         if ((bit & 0x01) == 1) {
             img_buffer[0] |= 1 << index;
         }
         index++;
     }
-    
+
     fclose(img);
     fclose(img_out);
     return 0;

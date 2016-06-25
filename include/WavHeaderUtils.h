@@ -1,6 +1,6 @@
 //
 //  WavHeaderUtils.h
-//  
+//
 //
 //  Created by Julieta Sal-lari on 25/5/16.
 //
@@ -19,7 +19,7 @@ typedef unsigned long DWORD;
 
 typedef struct WAV_HEADER {
     unsigned char riff[4];                      // RIFF string
-    unsigned int overall_size   ;               // overall size of file in bytes
+    unsigned int overall_size;                  // overall size of file in bytes
     unsigned char wave[4];                      // WAVE string
     unsigned char fmt_chunk_marker[4];          // fmt string with trailing null char
     unsigned int length_of_fmt;                 // length of the format data
