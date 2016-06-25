@@ -147,13 +147,13 @@ int main(int argc, char **argv) {
 	when(EMBED)
 		printf("Embed entered");
 		if (empty(in_path)) {
-			fail(INVALID_OP, NULL);
+				fail(INVALID_OP, NULL);
 		}
 		if (empty(p_path) || empty(out_path) || empty(steg_type)) {
-			fail(INVALID_OP, NULL);
+				fail(INVALID_OP, NULL);
 		}
 		if (empty(enc_type) != empty(mode) || empty(mode) != empty(password)) {
-			fail(INVALID_OP, NULL);
+				fail(INVALID_OP, NULL);
 		}
 		vector = fopen(p_path, "rb");
 		outfile = fopen(out_path, "wb");
@@ -173,32 +173,33 @@ int main(int argc, char **argv) {
 		fread(buffer_hide, payload_size, 1, payload);
 
 		if (streq(steg_type, "LSB1")) {
-			hideLSB1(vector, outfile, buffer_hide, payload_size, vector_size);
+				hideLSB1(vector, outfile, buffer_hide, payload_size, vector_size);
 		} else if (streq(steg_type, "LSB4")) {
-			hideLSB4(vector, outfile, buffer_hide, payload_size, vector_size);
+				hideLSB4(vector, outfile, buffer_hide, payload_size, vector_size);
 		} else if (streq(steg_type, "LSBE")) {
-			hideLSBEnh(vector, outfile, buffer_hide, payload_size, vector_size);
+				hideLSBEnh(vector, outfile, buffer_hide, payload_size, vector_size);
 		}
 		return SYS_OK;
 	when(EXTRACT)
 		printf("Valida");
 		if (empty(p_path) || empty(out_path) || empty(steg_type)) {
-			fail(INVALID_OP, NULL);
+				fail(INVALID_OP, NULL);
 		}
 		if (empty(enc_type) != empty(mode) || empty(mode) != empty(password)) {
-			fail(INVALID_OP, NULL);
+				fail(INVALID_OP, NULL);
 		}
 		printf("Empiezo");
 		vector = fopen(p_path, "rb");
 		outfile = fopen(out_path, "wb");
 		header = parseHeader(vector);
 		printf("Ya parseó");
+		int bytes_per_sample = header.bits_per_sample / 8;
 		if (streq(steg_type, "LSB1")) {
-			recoverLSB1(vector, outfile, header.bits_per_sample);
+				recoverLSB1(vector, outfile, bytes_per_sample);
 		} else if (streq(steg_type, "LSB4")) {
-			recoverLSB4(vector, outfile, header.bits_per_sample);
+				recoverLSB4(vector, outfile, bytes_per_sample);
 		} else if (streq(steg_type, "LSBE")) {
-			recoverLSBEnh(vector, outfile, header.bits_per_sample);
+				recoverLSBEnh(vector, outfile, bytes_per_sample);
 		}
 		return SYS_OK;
 	when(ANALYZE)
