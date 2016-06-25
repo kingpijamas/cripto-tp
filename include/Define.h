@@ -8,7 +8,11 @@ typedef enum {
 	NO_COMMAND, ANALYZE, EMBED, EXTRACT
 } comm;
 
-#define OK 0
+typedef enum {
+	UNKNOWN_ARG, EMBED_ARG, EXTRACT_ARG, IN_ARG, P_ARG, OUT_ARG, STEG_ARG, A_ARG, M_ARG, PASS_ARG
+} arg;
+
+#define SYS_OK 0
 
 typedef enum {
 	INVALID_OP,
@@ -32,7 +36,3 @@ typedef enum {
 typedef enum {
 	true, false
 } bool;
-
-typedef enum {
-	unknown, embed, extract, in, p, out, steg, a, m, pass
-} arg;

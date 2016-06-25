@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "../include/define.h"
+#include "../include/Define.h"
 #include "../include/WavHeaderUtils.h"
 #include "../include/LSB4.h"
 #include "../include/LSB.h"
@@ -29,7 +29,7 @@ static void print_help();
 int main(int argc, char **argv) {
 	if (argc == 1 || (streq(argv[1], "-h") || streq(argv[1], "--help"))) {
 		print_help();
-		return OK;
+		return SYS_OK;
 	}
 
 	comm command = NO_COMMAND;
@@ -43,15 +43,15 @@ int main(int argc, char **argv) {
 	for (index = 1; index < argc; index++) {
 		arg argument = parseArg(argv[index]);
 		switch (argument) {
-		case embed:
+		case EMBED_ARG:
 			;
 			command = EMBED;
 			break;
-		case extract:
+		case EXTRACT_ARG:
 			;
 			command = EXTRACT;
 			break;
-		case in:
+		case IN_ARG:
 			;
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
 			expectFileToExist(param, MISSING_IN_FILE);
 			in_path = param;
 			break;
-		case p:
+		case P_ARG:
 			;
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 			expectFileToExist(param, MISSING_P_FILE);
 			p_path = param;
 			break;
-		case out:
+		case OUT_ARG:
 			;
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
 			expectSuffix(param, WAV_EXT, INVALID_OUT_FORMAT);
 			out_path = param;
 			break;
-		case steg:
+		case STEG_ARG:
 			;
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
 			}
 			steg_type = param;
 			break;
-		case a:
+		case A_ARG:
 			;
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 			}
 			enc_type = param;
 			break;
-		case m:
+		case M_ARG:
 			;
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
 			}
 			mode = param;
 			break;
-		case pass:
+		case PASS_ARG:
 			;
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
 
 	//		EMBED OR EXTRACT
 
-	if (command == embed) {
+	if (command == EMBED_ARG) {
 		if (empty(p_path)) {
 			fail(INVALID_OP, NULL);
 		}
@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
 		fail(INVALID_OP, NULL);
 	}
 
-	printf("Parameters OK!\n");
+	printf("Parameters SYS_OK!\n");
 
 	//TODO aca habria que llamar al metodo correspondiente con los
 	//parametros recibidos
@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
 		} else {
 			break;
 		}
-		return OK;
+		return SYS_OK;
 	case EXTRACT:
 		;
 		break;
@@ -196,38 +196,38 @@ int main(int argc, char **argv) {
 		break;
 	}
 
-	return OK;
+	return SYS_OK;
 }
 
 arg parseArg(char * argument) {
 	if (streq(argument, "-embed")) {
-		return embed;
+		return EMBED_ARG;
 	}
 	if (streq(argument, "-extract")) {
-		return extract;
+		return EXTRACT_ARG;
 	}
 	if (streq(argument, "-in")) {
-		return in;
+		return IN_ARG;
 	}
 	if (streq(argument, "-p")) {
-		return p;
+		return P_ARG;
 	}
 	if (streq(argument, "-out")) {
-		return out;
+		return OUT_ARG;
 	}
 	if (streq(argument, "-steg")) {
-		return steg;
+		return STEG_ARG;
 	}
 	if (streq(argument, "-a")) {
-		return a;
+		return A_ARG;
 	}
 	if (streq(argument, "-m")) {
-		return m;
+		return M_ARG;
 	}
 	if (streq(argument, "-pass")) {
-		return pass;
+		return PASS_ARG;
 	}
-	return unknown;
+	return UNKNOWN_ARG;
 }
 
 void expectFileToExist(char * path, error error_code) {
@@ -255,12 +255,15 @@ int empty(char * str) {
 }
 
 int hasSuffix(char * str, char * suffix) {
-	char * last_appearance = strrchr(str, suffix);
-	if (last_appearance == NULL || strlen(last_appearance) > strlen(suffix)) {
-		// 'suffix' is not actually a suffix, just a substring
+	int str_len = strlen(str);
+	int suff_len = strlen(suffix);
+
+	if (suff_len > str_len) {
 		return false;
 	}
-	return (int) last_appearance;
+
+	int suff_start = str_len - suff_len - 1;
+	return streq(str + suff_start, suffix);
 }
 
 int validStegAlgorithm(char * algorithm) {
