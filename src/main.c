@@ -153,47 +153,54 @@ void embed(char * in_path, char * p_path, char * out_path, char * steg_type, cha
 	// }
 
 	FILE * vector = fopen(p_path, "rb");
-	FILE * outfile = fopen(out_path, "wb");
-	FILE * in_file = fopen(in_path, "rb");
+	FILE * out_file = fopen(out_path, "wb");
+	FILE * hide_file = fopen(in_path, "rb");
 
 	WAV_HEADER header = parse_header(vector);
-	fwrite(&header, 1, sizeof(header), outfile);
+	fwrite(&header, 1, sizeof(header), out_file);
 
 	char * data = marshall_plain(in_path);
 
 	unsigned short int bytes_per_sample = header.bits_per_sample / BITS_PER_BYTE;
 
 	if (streq(steg_type, "LSB1")) {
-		hide_lsb1(vector, in_file, bytes_per_sample, data);
+		hide_lsb1(out_file, vector, bytes_per_sample, data);
 	} else if (streq(steg_type, "LSB4")) {
-		// hide_lsb4(vector, outfile, buffer_hide, payload_size, bytes_per_sample); //TODO
+		// hide_lsb4(vector, out_file, buffer_hide, payload_size, bytes_per_sample); //TODO
 	} else if (streq(steg_type, "LSBE")) {
-		// hide_lsb_enh(vector, outfile, buffer_hide, payload_size, bytes_per_sample); //TODO
+		// hide_lsb_enh(vector, out_file, buffer_hide, payload_size, bytes_per_sample); //TODO
 	}
+
+	fclose(vector);
+	fclose(out_file);
+	fclose(hide_file);
 }
 
 void extract(char * in_path, char * p_path, char * out_path, char * steg_type, char * password, enc_type enc_type, enc_mode enc_mode) {
-	printf("Valida");
-	if (empty(p_path) || empty(out_path) || empty(steg_type)) {
+	printf("Valida\n");
+		if (empty(p_path) || empty(out_path) || empty(steg_type)) {
 		fail(INVALID_OP, NULL);
 	}
-	if ((enc_type == UNKNOWN_ENC_TYPE) != (enc_mode == UNKNOWN_ENC_MODE)
-			|| (enc_mode == UNKNOWN_ENC_MODE) != empty(password)) {
-		fail(INVALID_OP, NULL);
-	}
-	printf("Empiezo");
+	// if ((enc_type == UNKNOWN_ENC_TYPE) != (enc_mode == UNKNOWN_ENC_MODE)
+	// 		|| (enc_mode == UNKNOWN_ENC_MODE) != empty(password)) {
+	// 	fail(INVALID_OP, NULL);
+	// }
+	printf("Empiezo\n");
 	FILE * vector = fopen(p_path, "rb");
-	FILE * outfile = fopen(out_path, "wb");
+	FILE * out_file = fopen(out_path, "wb");
 	WAV_HEADER header = parse_header(vector);
-	printf("Ya parseó");
+	printf("Ya parsee\n");
 	int bytes_per_sample = header.bits_per_sample / 8;
 	if (streq(steg_type, "LSB1")) {
-		// recover_lsb1(vector, outfile, bytes_per_sample); //TODO
+		recover_lsb1(out_file, vector, bytes_per_sample); //TODO
 	} else if (streq(steg_type, "LSB4")) {
-		// recover_lsb4(vector, outfile, bytes_per_sample); //TODO
+		// recover_lsb4(vector, out_file, bytes_per_sample); //TODO
 	} else if (streq(steg_type, "LSBE")) {
-		// recover_lsb_enh(vector, outfile, bytes_per_sample); //TODO
+		// recover_lsb_enh(vector, out_file, bytes_per_sample); //TODO
 	}
+
+	fclose(vector);
+	fclose(out_file);
 }
 
 enc_type parse_enc_type(char * type) {

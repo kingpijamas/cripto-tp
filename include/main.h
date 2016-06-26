@@ -3,8 +3,8 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "define.h"
 #include "crypt.h"
+#include "define.h"
 #include "lsb1.h"
 #include "lsb4.h"
 #include "lsb_enhanced.h"

@@ -13,6 +13,7 @@ typedef enum {
 
 typedef unsigned long DWORD;
 
+#define BYTE_SIZE 		1
 #define BITS_PER_BYTE 8
 #define when(name) case(name):;
 
