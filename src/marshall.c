@@ -1,15 +1,15 @@
 #include "../include/marshall.h"
 
-static int readFile(char ** buffer, char * filename);
+static int read_file(char ** buffer, char * filename);
 
 
-char * marshallPlain(char * filename) {
+char * marshall_plain(char * filename) {
   char * extension = strchr(filename, '.');
   char ** payload_buffer = (char **) malloc(sizeof(char **));
 
   int size_size = sizeof(DWORD);
   int extension_size = strlen(extension) + 1; // \0 has to be marshalled
-  int payload_size = readFile(payload_buffer, filename);
+  int payload_size = read_file(payload_buffer, filename);
   if (payload_size == -1) {
     return NULL;
   }
@@ -23,10 +23,10 @@ char * marshallPlain(char * filename) {
   return marshalled_data;
 }
 
-char * marshallEncrypted(char * filename) {
+char * marshall_encrypted(char * filename) {
   char ** payload_buffer = (char **) malloc(sizeof(char **));
 
-  int payload_size = readFile(payload_buffer, filename);
+  int payload_size = read_file(payload_buffer, filename);
   if (payload_size == -1) {
     return NULL;
   }
@@ -41,7 +41,7 @@ char * marshallEncrypted(char * filename) {
   return marshalled_data;
 }
 
-int readFile(char ** buffer, char * filename) {
+int read_file(char ** buffer, char * filename) {
   int length = -1;
   FILE * file = fopen(filename, "rb");
 

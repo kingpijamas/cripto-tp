@@ -1,6 +1,6 @@
 //
 //  LSBEnhanced.h
-//  
+//
 //
 //  Created by Julieta Sal-lari on 30/5/16.
 //
@@ -11,8 +11,8 @@
 
 #include "define.h"
 
-void hideLSBEnh(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size);
+void hide_lsb_enh(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size);
 
-void recoverLSBEnh(FILE *fileptr, FILE *img_out, unsigned short int sample_size);
+void recover_lsb_enh(FILE *fileptr, FILE *img_out, unsigned short int sample_size);
 
 #endif // LSBENHANCED_H

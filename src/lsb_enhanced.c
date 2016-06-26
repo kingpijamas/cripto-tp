@@ -80,7 +80,7 @@ void insertSizeLSBEnh(FILE *fileptr, FILE *outfile, unsigned short int sample_si
     free(buffer);
 }
 
-void hideLSBEnh(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size) {
+void hide_lsb_enh(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size) {
     int read = 0;
     int write = 0;
     int img_read = 0;
@@ -115,7 +115,7 @@ void hideLSBEnh(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsi
     }
 }
 
-void recoverLSBEnh(FILE *fileptr, FILE *img_out, unsigned short int sample_size) {
+void recover_lsb_enh(FILE *fileptr, FILE *img_out, unsigned short int sample_size) {
     int read = 0;
     int img_read = 0;
     //unsigned short int sample_size = header.bits_per_sample / 8;

@@ -104,7 +104,7 @@ void insertSizeLSB4(FILE *fileptr, FILE *outfile, unsigned short int sample_size
     free(bytes);
     free(buffer);
 }
-void hideLSB4(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size) {
+void hide_lsb4(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size) {
     int read = 0;
     int write = 0;
     int img_read = 0;
@@ -144,7 +144,7 @@ void hideLSB4(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsign
 
 }
 
-void recoverLSB4(FILE *fileptr, FILE *img_out, unsigned short int sample_size) {
+void recover_lsb4(FILE *fileptr, FILE *img_out, unsigned short int sample_size) {
     int read = 0;
     int img_read = 0;
     //unsigned short int sample_size = header.bits_per_sample / 8;

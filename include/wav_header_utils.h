@@ -33,5 +33,5 @@ typedef struct WAV_HEADER {
     unsigned int data_size;                     // NumSamples * NumChannels * BitsPerSample/8 - size of the next chunk that will be read
 }WAV_HEADER;
 
-struct WAV_HEADER parseHeader(FILE * fileptr);
+struct WAV_HEADER parse_header(FILE * fileptr);
 #endif // WAVHEADERUTILS_H

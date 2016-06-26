@@ -15,7 +15,7 @@ typedef enum {
 
 char * encrypt_buffer(char * buffer, enc_type type, enc_mode mode, char * password);
 
-#define NON_ENC_PATH "/tmp/.non_enc_file"
-#define ENC_PATH "/tmp/.enc_file"
+#define NON_ENC_PATH	"/tmp/.non_enc_file"
+#define ENC_PATH 		 	"/tmp/.enc_file"
 
 #endif // CRYPT_H

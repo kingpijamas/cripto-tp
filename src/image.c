@@ -21,7 +21,7 @@
 //    }
 //
 //    //primero leo el header: 44B
-//    struct WAV_HEADER header = parseHeader(fileptr);
+//    struct WAV_HEADER header = parse_header(fileptr);
 //    if (header.length_of_fmt == 16) {
 //        //daltan leer  bytes vacios
 //        unsigned char aux_buffer[2];

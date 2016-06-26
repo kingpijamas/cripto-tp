@@ -11,7 +11,7 @@
 
 #include "define.h"
 
-void hideLSB1(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size);
-void recoverLSB1(FILE *fileptr, FILE *img_out, unsigned short int sample_size);
+void hide_lsb1(FILE * vector, FILE * in_file, unsigned short int sample_bytes, char * data);
+int recover_lsb1(FILE * data_file, FILE * vector, unsigned short int sample_bytes);
 
 #endif // LSB1_H

@@ -1,5 +1,3 @@
-//  wav_header_utils.h
-
 #ifndef DEFINE_H
 #define DEFINE_H
 
@@ -13,8 +11,9 @@ typedef enum {
 	true, false
 } bool;
 
-#define when(name) case(name):;
-
 typedef unsigned long DWORD;
+
+#define BITS_PER_BYTE 8
+#define when(name) case(name):;
 
 #endif // DEFINE_H
