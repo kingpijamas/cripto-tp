@@ -10,7 +10,7 @@ char * encrypt_buffer(char * buffer, enc_type type, enc_mode mode, char * passwo
 	}
 	fclose(non_encrypted_file);
 	char command[120];
-	strcpy(command, "openssl enc ");
+	strcpy(command, "openssl enc -nosalt -md md5 ");
 	switch (type) {
 	when(AES128)
 		strcat(command, "-aes-128");
@@ -49,6 +49,7 @@ char * encrypt_buffer(char * buffer, enc_type type, enc_mode mode, char * passwo
 	memset(command, 0, sizeof(command));
 	strcat(command, "rm ");
 	strcat(command, NON_ENC_PATH);
+	system(command);
 	return ENC_PATH;
 }
 
@@ -62,7 +63,7 @@ char * decrypt_buffer(char * buffer, enc_type type, enc_mode mode, char * passwo
 	}
 	fclose(encrypted_file);
 	char command[120];
-	strcpy(command, "openssl enc -d ");
+	strcpy(command, "openssl enc -d -nosalt -md md5 ");
 	switch (type) {
 	when(AES128)
 		strcat(command, "-aes-128");
@@ -101,5 +102,6 @@ char * decrypt_buffer(char * buffer, enc_type type, enc_mode mode, char * passwo
 	memset(command, 0, sizeof(command));
 	strcat(command, "rm ");
 	strcat(command, ENC_PATH);
+	system(command);
 	return *command;
 }
