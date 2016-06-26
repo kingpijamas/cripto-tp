@@ -80,39 +80,31 @@ void insertSizeLSBEnh(FILE *fileptr, FILE *outfile, unsigned short int sample_si
     free(buffer);
 }
 
-void hide_lsb_enh(FILE *fileptr, FILE *outfile, unsigned char *img, DWORD sz, unsigned short int sample_size) {
-    int read = 0;
-    int write = 0;
-    int img_read = 0;
-    unsigned char *buffer = (unsigned char *)malloc(sample_size);   //leo de a samples
-    unsigned char *img_buffer = (unsigned char *)malloc(1);         //leo de a un byte
-    unsigned char bit;
-    int index = 0;
+void hide_lsb_enh(FILE * vector, FILE * orig_file, unsigned short int sample_bytes, char * data) {
+  int input_bytes_read = 0;
+  int bits_hidden = 0;
+  unsigned char bit_to_hide;
+  unsigned char * buffer = (unsigned char *) calloc(1, sizeof(char));
 
-    //inserto el size
-    insertSizeLSBEnh(fileptr, outfile, sample_size, sz);
-
-    //leo el primer B de la imagen
-    //img_read = fread(img_buffer, 1, 1, img);
-    unsigned char imgByte = 0;
-
-    //leo un sample a la vez
-    while((read = fread(buffer, 1, sample_size, fileptr)) > 0) {
-        if (index >= 8) { //si ya lei todo un byte agarro el que sigue
-            index = 0;
-            img = img + 1;
-            img_read++;
-        }
-        if (img_read < sz) {
-            //agarro el bit index
-            bit = ((*img)>> index) & 1;
-            //cambio el ultimo bit del buffer de lectura
-            if (hideBitEnh(buffer, read, bit) == 1) {
-                index++;
-            }
-        }
-        fwrite(buffer, 1, read, outfile);			// Writing read data into output file
-    }
+  printf("\ndata: %s\n\n", data);
+  int bytes_to_hide = strlen(data); // TODO: get from struct!
+  //leo un sample a la vez
+  while((input_bytes_read = fread(buffer, BYTE_SIZE, sample_bytes, orig_file)) > 0) {
+      if (bits_hidden >= BITS_PER_BYTE) { //si ya lei todo un byte agarro el que sigue
+          bits_hidden = 0;
+          bytes_to_hide--;
+          data++;
+      }
+      if (bytes_to_hide > 0) {
+          // agarro el bit mas significativo
+          bit_to_hide = ((*data) >> (7 - bits_hidden)) & 0x01;
+          // cambio el ultimo bit del buffer de lectura
+          if (hideBitEnh(buffer, input_bytes_read, bit_to_hide) == 1) {
+        	  bits_hidden++;
+          }
+      }
+      fwrite(buffer, BYTE_SIZE, input_bytes_read, vector); // Writing read data into output file
+  }
 }
 
 void recover_lsb_enh(FILE *fileptr, FILE *img_out, unsigned short int sample_size) {
