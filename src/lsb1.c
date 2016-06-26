@@ -46,7 +46,14 @@ void hide_lsb1(FILE * vector, FILE * orig_file, unsigned short int sample_bytes,
 
 void hide_bit(unsigned char * buffer, int buffer_size, unsigned char data_bit){
   int last_idx = buffer_size - 1;
+  // printf("\n");
+  // print_bits(buffer[last_idx]);
   buffer[last_idx] = (buffer[last_idx] & ~0x01) | data_bit;
+  // printf("->");
+  // print_bits(buffer[last_idx]);
+  // printf(" (hid bit: ");
+  // print_bits(data_bit);
+  // printf(")\n");
 }
 
 int recover_lsb1(FILE * data_file, FILE * vector, unsigned short int sample_bytes){
@@ -95,23 +102,6 @@ int recover_bytes(char * data, FILE * vector, unsigned short int sample_bytes, u
   while(bytes_read < bytes_to_read) {
       fread(vector_buffer, 1, sample_bytes, vector); // TODO: == -1 ?
 
-      if (bits_read >= BITS_PER_BYTE) { //si ya lei todo un byte agarro el que sigue
-
-          // printf("data_size: %lu->", (DWORD) *data);
-          // print_bits(data[bytes_read]);
-          data[bytes_read] = data_byte;
-          // printf(" -> ");
-          print_bits(data[bytes_read]);
-          printf("\n");
-          // printf("%s\n", data);
-          // printf("(%d) '%.*s'\n", bytes_read, (int) sizeof(DWORD), data);
-          // printf("%lu\n", (DWORD) *data);
-          data_byte = 0;
-          bits_read = 0;
-          bytes_read++;
-          // printf("--------------\n");
-      }
-
       // printf("\n\n");
       // print_bits(vector_buffer[sample_bytes - 1]);
       // agarro el ultimo bit de la muestra
@@ -124,8 +114,26 @@ int recover_bytes(char * data, FILE * vector, unsigned short int sample_bytes, u
       // printf("\n");
 
       bits_read++;
+
+
+      if (bits_read == BITS_PER_BYTE) { //si ya lei todo un byte agarro el que sigue
+
+          // printf("data_size: %lu->", (DWORD) *data);
+          // print_bits(data[bytes_read]);
+          data[bytes_read] = data_byte;
+          // printf(" -> ");
+          // print_bits(data[bytes_read]);
+          // printf("\n");
+          // printf("%s\n", data);
+          // printf("(%d) '%.*s'\n", bytes_read, (int) sizeof(DWORD), data);
+          // printf("%lu\n", (DWORD) *data);
+          data_byte = 0;
+          bits_read = 0;
+          bytes_read++;
+          // printf("--------------\n");
+      }
   }
-  printf("(%d) '%.*s'\n", bytes_read, (int) sizeof(DWORD), data);
+  // printf("(%d) '%.*s'\n", bytes_read, (int) sizeof(DWORD), data);
   free(vector_buffer);
   return bytes_to_read;
 }
