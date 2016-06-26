@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 			password = param;
 			break;
 		default:
-			printf("Comando desconocido: \"%s\". IGNORADO \n", argv[index]);
+			printf("Comando desconocido: \"%s\". IGNORADO\n", argv[index]);
 		}
 	}
 
@@ -291,17 +291,17 @@ int validStegAlgorithm(char * algorithm) {
 
 void print_help() {
 	printf("----------------------------------------------------------------------------------------------\n");
-	printf("Help Menu \n");
+	printf("Help Menu\n");
 	printf("----------------------------------------------------------------------------------------------\n");
-	printf("-embed \t\t\t\t\t\t Indica que se va a ocultar información \n");
-	printf("-extract \t\t\t\t\t Indica que se va a extraer información \n");
-	printf("-in [file] \t\t\t\t\t Archivo que se va a ocultar \n");
-	printf("-p [wavefile] \t\t\t\t\t Archivo wav portador \n");
-	printf("-out [file] \t\t\t\t\t Archivo de salida obtenido \n");
-	printf("-steg <LSB1 | LSB4 | LSBE> \t\t\t Algoritmo de esteganografiado \n");
-	printf("-a <aes128 | aes192 | aes256 | des> (OPTIONAL) \n");
-	printf("-m <ecb | cfb | ofb | cbc> (OPTIONAL) \n");
-	printf("-pass [password] (OPTIONAL) \t\t\t password de encripcion \n");
+	printf("-embed \t\t\t\t\t\t Indica que se va a ocultar información\n");
+	printf("-extract \t\t\t\t\t Indica que se va a extraer información\n");
+	printf("-in [file] \t\t\t\t\t Archivo que se va a ocultar\n");
+	printf("-p [wavefile] \t\t\t\t\t Archivo wav portador\n");
+	printf("-out [file] \t\t\t\t\t Archivo de salida obtenido\n");
+	printf("-steg <LSB1 | LSB4 | LSBE> \t\t\t Algoritmo de esteganografiado\n");
+	printf("-a <aes128 | aes192 | aes256 | des> (OPTIONAL)\n");
+	printf("-m <ecb | cfb | ofb | cbc> (OPTIONAL)\n");
+	printf("-pass [password] (OPTIONAL) \t\t\t password de encripcion\n");
 }
 
 void fail(error err, char * param) {
@@ -335,13 +335,13 @@ void fail(error err, char * param) {
 		printf("No existe el archivo %s\n", param);
 		break;
 	case INVALID_P_FORMAT:
-		printf("Formato incorrecto. El parametro -p espera .wav \n");
+		printf("Formato incorrecto. El parametro -p espera .wav\n");
 		break;
 	case INVALID_OUT_FORMAT:
-		printf("Formato incorrecto. El parametro -p espera .wav \n");
+		printf("Formato incorrecto. El parametro -p espera .wav\n");
 		break;
 	case INVALID_STEG:
-		printf("No es valido el algoritmo de esteganografiado \n");
+		printf("No es valido el algoritmo de esteganografiado\n");
 		break;
 	}
 	exit(-1);
