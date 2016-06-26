@@ -18,14 +18,14 @@ void print_bits(unsigned char num){
     printf("'");
 }
 
-void hide_lsb1(FILE * vector, FILE * orig_file, unsigned short int sample_bytes, char * data) {
+void hide_lsb1(FILE * vector, FILE * orig_file, unsigned short int sample_bytes, char * data, int bytes_to_hide) {
   int input_bytes_read = 0;
   int bits_hidden = 0;
   unsigned char bit_to_hide;
   unsigned char * buffer = (unsigned char *) calloc(1, sizeof(char));
 
   // printf("\ndata: %s\n\n", data);
-  int bytes_to_hide = strlen(data); // TODO: get from struct!
+  // int bytes_to_hide = strlen(data); // TODO: get from struct!
   //leo un sample a la vez
   while((input_bytes_read = fread(buffer, BYTE_SIZE, sample_bytes, orig_file)) > 0) {
       if (bits_hidden >= BITS_PER_BYTE) { //si ya lei todo un byte agarro el que sigue
@@ -54,6 +54,9 @@ int recover_lsb1(FILE * data_file, FILE * vector, unsigned short int sample_byte
     // char raw_data_size[sizeof(DWORD)] = { 0 };
     // printf("hola\n");
     int bytes_recovered = recover_bytes((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
+
+    data_size = __builtin_bswap64(data_size);
+
     // DWORD data_size = *raw_data_size;
     // printf("asd\n");
     // printf("HOLA: %lu\n", *data_aux);
@@ -62,8 +65,8 @@ int recover_lsb1(FILE * data_file, FILE * vector, unsigned short int sample_byte
     // print_bits(data_aux[0]);
     // printf("asdasd\n");
     // , data_size: %.*s vs %lu\n", bytes_recovered, (int) sizeof(DWORD), (unsigned char *) &data_size, data_size);
-    // printf("\ndata_size: %lu\n", data_size);
-    char * data = (char *) malloc(data_size);
+    printf("\ndata_size: %lu\n", data_size);
+    char * data = (char *) calloc(data_size, sizeof(char));
     bytes_recovered += recover_bytes(data, vector, sample_bytes, data_size);
 
     // unsigned char * data = (unsigned char *) malloc(31);
@@ -90,7 +93,7 @@ int recover_bytes(char * data, FILE * vector, unsigned short int sample_bytes, u
 
   printf("\nbytes_to_read: %d\n", bytes_to_read);
   while(bytes_read < bytes_to_read) {
-      fread(vector_buffer, BYTE_SIZE, sample_bytes, vector); // TODO: == -1 ?
+      fread(vector_buffer, 1, sample_bytes, vector); // TODO: == -1 ?
 
       if (bits_read >= BITS_PER_BYTE) { //si ya lei todo un byte agarro el que sigue
 
@@ -98,20 +101,22 @@ int recover_bytes(char * data, FILE * vector, unsigned short int sample_bytes, u
           // print_bits(data[bytes_read]);
           data[bytes_read] = data_byte;
           // printf(" -> ");
-          // print_bits(data[bytes_read]);
-          // printf("\n");
+          print_bits(data[bytes_read]);
+          printf("\n");
           // printf("%s\n", data);
           // printf("(%d) '%.*s'\n", bytes_read, (int) sizeof(DWORD), data);
           // printf("%lu\n", (DWORD) *data);
           data_byte = 0;
           bits_read = 0;
           bytes_read++;
-          // printf("--------------");
+          // printf("--------------\n");
       }
 
       // printf("\n\n");
       // print_bits(vector_buffer[sample_bytes - 1]);
       // agarro el ultimo bit de la muestra
+      // print_bits(vector_buffer[1]);
+      // print_bits(data_byte);
       data_byte <<= 1;
       data_byte |= lsb(vector_buffer, sample_bytes);
       // printf("->");

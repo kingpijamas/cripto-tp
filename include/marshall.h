@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include "wav_header_utils.h" // FIXME
 
-char * marshall_plain(char * filename);
+int marshall_plain(char * filename, char ** marshalled_data);
 char * marshall_encrypted(char * filename);
 
 #endif
