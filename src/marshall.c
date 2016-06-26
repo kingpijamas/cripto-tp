@@ -30,13 +30,23 @@ char * marshall_plain(char * filename) {
   char * marshalled_data = (char *) calloc(1, marshalled_size);
 
   DWORD payload_bytes = bytes_read;
-  memcpy(marshalled_data, (unsigned char *) &payload_bytes, size_bytes);
-  printf("Embedding:\n  size: ");
+  memcpy(marshalled_data, (char *) &payload_bytes, size_bytes);
+  memcpy(marshalled_data + size_bytes, *payload_buffer, bytes_read);
+  memcpy(marshalled_data + size_bytes + bytes_read, extension, extension_bytes);
+
+  printf("marshalled_data:\n  size: %lu ", marshalled_data[0]);
   print_bits(marshalled_data[0]);
-  memcpy(marshalled_data + size_bytes, *payload_buffer, payload_bytes);
+  printf("\n- %d", 0);
   printf("\n  payload: '%s'", marshalled_data + size_bytes);
-  memcpy(marshalled_data + size_bytes + payload_bytes, extension, extension_bytes);
-  printf("\n  extension: '%s'\n", marshalled_data + size_bytes + payload_bytes);
+  printf("\n- %d", size_bytes);
+  printf("\n  extension: '%s'", marshalled_data + size_bytes + bytes_read);
+  printf("\n- %d", bytes_read + size_bytes);
+
+  for (int i=0; i < marshalled_size; i++) {
+    printf("\n(%d)", i);
+    print_bits(marshalled_data[i]);
+  }
+  printf("\n\n");
 
   free(*payload_buffer);
   free(payload_buffer);
@@ -79,9 +89,3 @@ int read_file(char ** buffer, char * filename) {
   }
   return length;
 }
-
-// DWORD unmarshall_size(char * size_str) {
-//   DWORD payload_bytes = 0;
-//   sscanf(size_str, "%.*lu", (int) sizeof(DWORD), &payload_bytes);
-//   return payload_bytes;
-// }
