@@ -187,15 +187,13 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 	// 		|| (enc_mode == UNKNOWN_ENC_MODE) != empty(password)) {
 	// 	fail(INVALID_OP, NULL);
 	// }
-	printf("Empiezo\n");
+
 	FILE * vector = fopen(p_path, "rb");
-	FILE * out_file = fopen(out_path, "wb");
 	WAV_HEADER header = parse_header(vector);
-	printf("Ya parsee\n");
 	int bytes_per_sample = header.bits_per_sample / BITS_PER_BYTE;
 
 	if (streq(steg_type, "LSB1")) {
-		recover_lsb1(out_file, vector, bytes_per_sample); //TODO
+		recover_lsb1(out_path, vector, bytes_per_sample); //TODO
 	} else if (streq(steg_type, "LSB4")) {
 		// recover_lsb4(vector, out_file, bytes_per_sample); //TODO
 	} else if (streq(steg_type, "LSBE")) {
@@ -203,7 +201,6 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 	}
 
 	fclose(vector);
-	fclose(out_file);
 }
 
 enc_type parse_enc_type(char * type) {

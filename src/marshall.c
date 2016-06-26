@@ -36,19 +36,18 @@ int marshall_plain(char * filename, char ** marshalled_data) {
 	memcpy((*marshalled_data) + size_bytes, *payload_buffer, payload_bytes);
 	memcpy((*marshalled_data) + size_bytes + payload_bytes, extension, extension_bytes);
 
-	printf("marshalled_data:\n  size: %lu ", (*marshalled_data)[0]);
-	print_bits((*marshalled_data)[0]);
-	printf("\n- %d", 0);
-	printf("\n  payload: '%s'", (*marshalled_data) + size_bytes);
-	printf("\n- %d", size_bytes);
-	printf("\n  extension: '%s'", (*marshalled_data) + size_bytes + payload_bytes);
-	printf("\n- %d", payload_bytes + size_bytes);
-
-	for (int i = 0; i < marshalled_size; i++) {
-		printf("\n(%d)", i);
-		print_bits((*marshalled_data)[i]);
-	}
-	printf("\n\n");
+	// printf("marshalled_data:\n  size: %lu ", (*marshalled_data)[0]);
+	// print_bits((*marshalled_data)[0]);
+	// printf("\n- %d", 0);
+	// printf("\n  payload: '%s'", (*marshalled_data) + size_bytes);
+	// printf("\n- %d", size_bytes);
+	// printf("\n  extension: '%s'", (*marshalled_data) + size_bytes + payload_bytes);
+	// printf("\n- %d", payload_bytes + size_bytes);
+	// for (int i = 0; i < marshalled_size; i++) {
+	// 	printf("\n(%d)", i);
+	// 	print_bits((*marshalled_data)[i]);
+	// }
+	// printf("\n\n");
 
 	free(*payload_buffer);
 	free(payload_buffer);
@@ -86,7 +85,7 @@ int read_file(char ** buffer, char * filename) {
 			fread(*buffer, 1, length, file);
 			(*buffer)[length] = '\0';
 		}
-		printf("\nlength: %d\nbuffer: %s\n", length, *buffer);
+		// printf("\nlength: %d\nbuffer: %s\n", length, *buffer);
 		fclose(file);
 	}
 	return length;
