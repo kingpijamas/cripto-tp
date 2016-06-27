@@ -7,6 +7,6 @@
 
 void hide_lsb1(FILE * vector, FILE * orig_file, unsigned short int sample_bytes, char * data,
 		unsigned int bytes_to_hide);
-int recover_lsb1(char * file_name, FILE * vector, unsigned short int sample_bytes);
+int recover_lsb1(char * file_name, FILE * vector, unsigned short int sample_bytes, bool ext);
 
 #endif // LSB1_H

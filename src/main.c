@@ -206,12 +206,11 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 	}
 
 	if (streq(steg_type, "LSB1")) {
-		printf("boom\n");
-		recover_lsb1(recovery_path, vector, bytes_per_sample);
+		recover_lsb1(recovery_path, vector, bytes_per_sample, !decrypt);
 	} else if (streq(steg_type, "LSB4")) {
-		recover_lsb4(recovery_path, vector, bytes_per_sample);
+		recover_lsb4(recovery_path, vector, bytes_per_sample, !decrypt);
 	} else if (streq(steg_type, "LSBE")) {
-		recover_lsb_enh(recovery_path, vector, bytes_per_sample);
+		recover_lsb_enh(recovery_path, vector, bytes_per_sample, !decrypt);
 	}
 
 	if (decrypt) {

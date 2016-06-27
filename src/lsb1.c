@@ -47,7 +47,7 @@ void hide_bit(unsigned char * buffer, int buffer_size, unsigned char data_bit){
   buffer[last_idx] = (buffer[last_idx] & ~0x01) | data_bit;
 }
 
-int recover_lsb1(char * out_path, FILE * vector, unsigned short int sample_bytes){
+int recover_lsb1(char * out_path, FILE * vector, unsigned short int sample_bytes, bool ext){
     // load body size
     DWORD data_size = 0;
     int bytes_recovered = recover_bytes((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
@@ -59,14 +59,18 @@ int recover_lsb1(char * out_path, FILE * vector, unsigned short int sample_bytes
 
     // load extension
     char extension[MAX_EXT_LEN + 1] = { '\0' };
-    int i = 0;
-    char ext_c = 0;
-    do {
-      recover_bytes(&ext_c, vector, sample_bytes, sizeof(char));
-      extension[i] = ext_c;
-      i++;
-    } while(ext_c != '\0');
 
+    if (ext) {
+      int i = 0;
+      char ext_c = 0;
+      do {
+        recover_bytes(&ext_c, vector, sample_bytes, sizeof(char));
+        extension[i] = ext_c;
+        i++;
+      } while(ext_c != '\0');
+    }
+
+    printf("boom\n");
     // save all to new file
     create_file(out_path, extension, data, data_size);
     free(data);
