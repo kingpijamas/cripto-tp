@@ -11,7 +11,7 @@ int hideBitEnh(unsigned char *buffer, int size, unsigned char img_bit) {
 	return 1;
 }
 
-void hide_lsb_enh(FILE * vector, FILE * orig_file, unsigned short int sample_bytes, char * data, int bytes_to_hide) {
+void hide_lsb_enh(FILE * vector, FILE * orig_file, unsigned short int sample_bytes, char * data, unsigned int bytes_to_hide) {
 	int input_bytes_read = 0;
 	int bits_hidden = 0;
 	unsigned char bit_to_hide;
@@ -48,13 +48,7 @@ int recover_lsb_enh(char * out_path, FILE * vector, unsigned short int sample_by
 
 	// load extension
 	char extension[MAX_EXT_LEN + 1] = { '\0' };
-	int i = 0;
-	char ext_c = 0;
-	do {
-		recover_bytes_enh(&ext_c, vector, sample_bytes, sizeof(char));
-		extension[i] = ext_c;
-		i++;
-	} while (ext_c != '\0');
+
 	if (ext) {
 		int i = 0;
 		char ext_c = 0;
@@ -64,6 +58,7 @@ int recover_lsb_enh(char * out_path, FILE * vector, unsigned short int sample_by
 			i++;
 		} while (ext_c != '\0');
 	}
+	// save all to new file
 	int bytes_recovered = create_file(out_path, extension, data, data_size);
 	free(data);
 	return bytes_recovered;

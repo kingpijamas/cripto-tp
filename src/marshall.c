@@ -55,7 +55,7 @@ int marshall_encrypted(char * filename, char ** marshalled_data) {
 		printf("\n");
 		print_bits(((char *) &payload_bytes)[i]);
 	}
-	printf("\n----SIZE----(%lu)\n\n", payload_bytes);
+	printf("\n----SIZE----(%u)\n\n", payload_bytes);
 
 	DWORD flipped_payload_bytes = __builtin_bswap32(payload_bytes);
 

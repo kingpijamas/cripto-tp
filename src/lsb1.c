@@ -4,107 +4,108 @@ static void hide_bit(unsigned char *buffer, int size, unsigned char data_bit);
 static unsigned char lsb(unsigned char * buffer, int buffer_bytes);
 static void print_bits(unsigned char num);
 
-void print_bits(unsigned char num){
-    unsigned char size = sizeof(unsigned char);
-    unsigned char maxPow = 1 << (size * 8 - 1);
+void print_bits(unsigned char num) {
+	unsigned char size = sizeof(unsigned char);
+	unsigned char maxPow = 1 << (size * 8 - 1);
 
-    printf("'");
-    for(unsigned int i=0; i < size * 8; i++){
-      // print last bit and shift left.
-      printf("%u", (num & maxPow) ? 1 : 0);
-      num <<= 1;
-    }
-    printf("'");
+	printf("'");
+	for (unsigned int i = 0; i < size * 8; i++) {
+		// print last bit and shift left.
+		printf("%u", (num & maxPow) ? 1 : 0);
+		num <<= 1;
+	}
+	printf("'");
 }
 
-void hide_lsb1(FILE * vector, FILE * orig_file, unsigned short int sample_bytes, char * data, unsigned int bytes_to_hide) { // TODO: unsigned long
-  int input_bytes_read = 0;
-  int bits_hidden = 0;
-  unsigned char bit_to_hide;
-  unsigned char * buffer = (unsigned char *) calloc(1, sizeof(char));
+void hide_lsb1(FILE * vector, FILE * orig_file, unsigned short int sample_bytes, char * data,
+		unsigned int bytes_to_hide) { // TODO: unsigned long
+	int input_bytes_read = 0;
+	int bits_hidden = 0;
+	unsigned char bit_to_hide;
+	unsigned char * buffer = (unsigned char *) calloc(1, sizeof(char));
 
-  //leo un sample a la vez
-  while((input_bytes_read = fread(buffer, BYTE_SIZE, sample_bytes, orig_file)) > 0) {
-      if (bits_hidden >= BITS_PER_BYTE) { //si ya lei todo un byte agarro el que sigue
-          bits_hidden = 0;
-          bytes_to_hide--;
-          data++;
-      }
-      if (bytes_to_hide > 0) {
-          // agarro el bit mas significativo
-          bit_to_hide = ((*data) >> (7 - bits_hidden)) & 0x01;
-          // cambio el ultimo bit del buffer de lectura
-          hide_bit(buffer, sample_bytes, bit_to_hide);
-          bits_hidden++;
-      }
-      fwrite(buffer, BYTE_SIZE, input_bytes_read, vector); // Writing read data into output file
-  }
+	//leo un sample a la vez
+	while ((input_bytes_read = fread(buffer, BYTE_SIZE, sample_bytes, orig_file)) > 0) {
+		if (bits_hidden >= BITS_PER_BYTE) { //si ya lei todo un byte agarro el que sigue
+			bits_hidden = 0;
+			bytes_to_hide--;
+			data++;
+		}
+		if (bytes_to_hide > 0) {
+			// agarro el bit mas significativo
+			bit_to_hide = ((*data) >> (7 - bits_hidden)) & 0x01;
+			// cambio el ultimo bit del buffer de lectura
+			hide_bit(buffer, sample_bytes, bit_to_hide);
+			bits_hidden++;
+		}
+		fwrite(buffer, BYTE_SIZE, input_bytes_read, vector); // Writing read data into output file
+	}
 }
 
-void hide_bit(unsigned char * buffer, int buffer_size, unsigned char data_bit){
-  int last_idx = buffer_size - 1;
-  buffer[last_idx] = (buffer[last_idx] & ~0x01) | data_bit;
+void hide_bit(unsigned char * buffer, int buffer_size, unsigned char data_bit) {
+	int last_idx = buffer_size - 1;
+	buffer[last_idx] = (buffer[last_idx] & ~0x01) | data_bit;
 }
 
-int recover_lsb1(char * out_path, FILE * vector, unsigned short int sample_bytes, bool ext){
-    // load body size
-    DWORD data_size = 0;
-    recover_bytes_lsb1((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
-    data_size = __builtin_bswap32(data_size);
-    char * data = (char *) calloc(data_size, sizeof(char));
+int recover_lsb1(char * out_path, FILE * vector, unsigned short int sample_bytes, bool ext) {
+	// load body size
+	DWORD data_size = 0;
+	recover_bytes_lsb1((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
+	data_size = __builtin_bswap32(data_size);
+	char * data = (char *) calloc(data_size, sizeof(char));
 	recover_bytes_lsb1(data, vector, sample_bytes, data_size);
 
-    // printf("----PAYLOAD SENT----");
-  	// for (int i=0; i<data_size; i++) {
-  	// 	printf("\n");
-  	// 	print_bits(data[i]);
-  	// }
-  	// printf("\n----PAYLOAD SENT----\n\n");
+	// printf("----PAYLOAD SENT----");
+	// for (int i=0; i<data_size; i++) {
+	// 	printf("\n");
+	// 	print_bits(data[i]);
+	// }
+	// printf("\n----PAYLOAD SENT----\n\n");
 
-    // load extension
-    char extension[MAX_EXT_LEN + 1] = { '\0' };
+	// load extension
+	char extension[MAX_EXT_LEN + 1] = { '\0' };
 
-    if (ext) {
-      int i = 0;
-      char ext_c = 0;
-      do {
-    	  recover_bytes_lsb1(&ext_c, vector, sample_bytes, sizeof(char));
-        extension[i] = ext_c;
-        i++;
-      } while(ext_c != '\0');
-    }
-    // save all to new file
-    int bytes_recovered = create_file(out_path, extension, data, data_size);
-    free(data);
-    return bytes_recovered;
+	if (ext) {
+		int i = 0;
+		char ext_c = 0;
+		do {
+			recover_bytes_lsb1(&ext_c, vector, sample_bytes, sizeof(char));
+			extension[i] = ext_c;
+			i++;
+		} while (ext_c != '\0');
+	}
+	// save all to new file
+	int bytes_recovered = create_file(out_path, extension, data, data_size);
+	free(data);
+	return bytes_recovered;
 }
 
 int recover_bytes_lsb1(char * data, FILE * vector, unsigned short int sample_bytes, unsigned int bytes_to_read) {
-  unsigned char * vector_buffer = (unsigned char *) calloc(sample_bytes, BYTE_SIZE);
-  unsigned char data_byte = 0;
+	unsigned char * vector_buffer = (unsigned char *) calloc(sample_bytes, BYTE_SIZE);
+	unsigned char data_byte = 0;
 
-  unsigned int bytes_read = 0;
-  unsigned int bits_read = 0;
+	unsigned int bytes_read = 0;
+	unsigned int bits_read = 0;
 
-  while(bytes_read < bytes_to_read) {
-      fread(vector_buffer, 1, sample_bytes, vector); // TODO: == -1 ?
+	while (bytes_read < bytes_to_read) {
+		fread(vector_buffer, 1, sample_bytes, vector); // TODO: == -1 ?
 
-      data_byte <<= 1;
-      data_byte |= lsb(vector_buffer, sample_bytes);
+		data_byte <<= 1;
+		data_byte |= lsb(vector_buffer, sample_bytes);
 
-      bits_read++;
+		bits_read++;
 
-      if (bits_read == BITS_PER_BYTE) { //si ya lei todo un byte agarro el que sigue
-          data[bytes_read] = data_byte;
-          data_byte = 0;
-          bits_read = 0;
-          bytes_read++;
-      }
-  }
-  free(vector_buffer);
-  return bytes_to_read;
+		if (bits_read == BITS_PER_BYTE) { //si ya lei todo un byte agarro el que sigue
+			data[bytes_read] = data_byte;
+			data_byte = 0;
+			bits_read = 0;
+			bytes_read++;
+		}
+	}
+	free(vector_buffer);
+	return bytes_to_read;
 }
 
 unsigned char lsb(unsigned char * buffer, int buffer_bytes) {
-  return (buffer[buffer_bytes - 1]) & 0x01;
+	return (buffer[buffer_bytes - 1]) & 0x01;
 }

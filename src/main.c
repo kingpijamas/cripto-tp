@@ -266,7 +266,7 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 		}
 		printf("\n----SIZE----\n\n");
 
-		printf("payload_bytes: %lu\n", payload_bytes);
+		printf("payload_bytes: %u\n", payload_bytes);
 		printf("boom\n");
 
 		char * payload = (char *) malloc(payload_bytes);
