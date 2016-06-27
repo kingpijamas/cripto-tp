@@ -187,8 +187,8 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 	if (empty(p_path) || empty(out_path) || empty(steg_type)) {
 		fail(INVALID_OP, NULL);
 	}
-	bool encrypt = !empty(password);
-	if (encrypt && (enc_type == UNKNOWN_ENC_TYPE || enc_mode == UNKNOWN_ENC_MODE)) {
+	bool decrypt = !empty(password);
+	if (decrypt && (enc_type == UNKNOWN_ENC_TYPE || enc_mode == UNKNOWN_ENC_MODE)) {
 		fail(INVALID_OP, NULL);
 	}
 
@@ -197,21 +197,40 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 	int bytes_per_sample = header.bits_per_sample / BITS_PER_BYTE;
 
 	char * recovery_path = out_path;
-	if (encrypt) {
+	if (decrypt) {
 		recovery_path = ENC_PATH;
 	}
 
 	if (streq(steg_type, "LSB1")) {
-		recover_lsb1(recovery_path, vector, bytes_per_sample); //TODO
+		recover_lsb1(recovery_path, vector, bytes_per_sample);
 	} else if (streq(steg_type, "LSB4")) {
-		recover_lsb4(recovery_path, vector, bytes_per_sample); //TODO
+		recover_lsb4(recovery_path, vector, bytes_per_sample);
 	} else if (streq(steg_type, "LSBE")) {
-		recover_lsb_enh(recovery_path, vector, bytes_per_sample); //TODO
+		recover_lsb_enh(recovery_path, vector, bytes_per_sample);
 	}
 
-	if (encrypt) {
-		// decrypt_buffer(data, enc_type, enc_mode, password);
-		// marshalled_size = marshall_encrypted(in_path, &data);
+	if (decrypt) {
+		char * encrypted_data = (char *) malloc(sizeof(char *));
+		read_file(&encrypted_data, recovery_path); // TODO == -1?
+		char * decrypted_file_path = decrypt_buffer(&encrypted_data, enc_type, enc_mode, password);
+
+		char * marshalled_data = (char *) malloc(sizeof(char *));
+		read_file(&marshalled_data, decrypted_file_path); // TODO == -1?
+
+		int size_bytes = sizeof(DWORD);
+		DWORD payload_bytes = 0;
+		memcpy(&payload_bytes, marshalled_data, size_bytes);
+		payload_bytes = __builtin_bswap64(payload_bytes);
+
+		char * payload = (char *) malloc(payload_bytes);
+		memcpy(payload, marshalled_data + size_bytes, payload_bytes);
+
+		char * extension = marshalled_data + size_bytes + payload_bytes;
+		create_file(out_path, extension, payload, payload_bytes); // TODO == -1?
+
+		free(payload);
+		free(marshalled_data);
+		free(encrypted_data);
 	}
 
 	fclose(vector);
