@@ -1,11 +1,3 @@
-//
-//  LSB.c
-//
-//
-//  Created by Julieta Sal-lari on 29/5/16.
-//
-//
-
 #include "../include/lsb_enhanced.h"
 
 static unsigned char lsb(unsigned char * buffer, int buffer_bytes);

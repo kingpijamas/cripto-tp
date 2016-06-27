@@ -1,10 +1,3 @@
-//
-//  WavHeaderUtils.c
-//
-//
-//  Created by Julieta Sal-lari on 25/5/16.
-//
-//
 #include "../include/wav_header_utils.h"
 
 unsigned int littleTobigEndian4(unsigned char buffer4[]){

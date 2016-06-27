@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
 		extract(p_path, out_path, steg_type, password, enc_type, enc_mode);
 		return SYS_OK;
 	when(ANALYZE)
-		// TODO
+		stegoanalyze(p_path);
 		break;
 	default:
 		printf("No command assigned!");

@@ -1,5 +1,3 @@
-//  crypt.h
-
 #ifndef CRYPT_H
 #define CRYPT_H
 
