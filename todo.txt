@@ -1,3 +1,44 @@
 Limpiar variables sin usar
 Cambiar "imagen" a "payload"
 Ver que cree los files donde dumpea
+cambiar ints a longs
+
+1. Para la implementación del programa stegowav se pide que la ocultación comience en la
+primer muestra del archivo de audio. ¿Sería mejor empezar en otra ubicación? ¿Por qué?
+Sería mejor en cuanto al aspecto de "hiding", ya que sería más dificil poder determinar si un archivo tiene o no tiene
+otro archivo embebido, siempre y cuando no sea un estándard (ya que sería igual de bueno que si empieza al principio en ese caso).
+En cuanto a la protección de datos, es preferible encriptar los datos ocultados a tener de clave la posición de comienzo, ya que son muy susceptibles a stegoanálisis.
+
+La desventaja es que se necesita que tanto el emisor como el receptor sepan la posición del comienzo de la ocultación como un dato extra, al igual que la encripción.
+
+2. Esteganografiar un mismo archivo en un .wav con cada uno de los tres algoritmos, y
+comparar los resultados obtenidos. Hacer un cuadro comparativo de los tres algoritmos
+estableciendo ventajas y desventajas.
+
+
+3. Para la implementación del programa stegowav se pide que la extensión del archivo se
+oculte después del contenido completo del archivo. ¿por qué no conviene ponerla al
+comienzo, después del tamaño de archivo?
+
+
+4. Explicar detalladamente el procedimiento realizado para descubrir qué se había ocultado
+en cada archivo y de qué modo.
+
+
+5. ¿Qué se encontró en cada archivo?
+
+
+6. Algunos mensajes ocultos tenían, a su vez, otros mensajes ocultos. Indica cuál era ese
+mensaje y cómo se había ocultado.
+
+
+7. Uno de los archivos ocultos era una porción de un video, donde se ve ejemplificado una
+manera de ocultar información ¿cuál fue el portador?
+
+
+8. ¿De qué se trató el método de estenografiado que no era LSB? ¿Es un método eficaz? ¿Por
+qué?
+
+
+9. ¿Qué mejoras o futuras extensiones harías al programa stegowav?
+

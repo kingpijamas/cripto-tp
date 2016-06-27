@@ -12,8 +12,10 @@ static void expect_file_to_exist(char * path, error error_code);
 static void expect_suffix(char * param, char * suffix, error error_code);
 static void fail(error error_code, char * param);
 static void print_help();
-static void extract(char * p_path, char * out_path, char * steg_type, char * password, enc_type enc_type, enc_mode enc_mode);
-static void embed(char * in_path, char * p_path, char * out_path, char * steg_type, char * password, enc_type enc_type, enc_mode enc_mode);
+static void extract(char * p_path, char * out_path, char * steg_type, char * password, enc_type enc_type,
+		enc_mode enc_mode);
+static void embed(char * in_path, char * p_path, char * out_path, char * steg_type, char * password, enc_type enc_type,
+		enc_mode enc_mode);
 
 int main(int argc, char **argv) {
 	printf("Antes del help");
@@ -140,7 +142,8 @@ int main(int argc, char **argv) {
 	return SYS_OK;
 }
 
-void embed(char * in_path, char * p_path, char * out_path, char * steg_type, char * password, enc_type enc_type, enc_mode enc_mode) {
+void embed(char * in_path, char * p_path, char * out_path, char * steg_type, char * password, enc_type enc_type,
+		enc_mode enc_mode) {
 	if (empty(in_path)) {
 		fail(INVALID_OP, NULL);
 	}
@@ -160,14 +163,14 @@ void embed(char * in_path, char * p_path, char * out_path, char * steg_type, cha
 	fwrite(&header, 1, sizeof(header), out_file);
 
 	char * data = (char *) calloc(1, sizeof(char *));
-  int marshalled_size = marshall_plain(in_path, &data);
+	int marshalled_size = marshall_plain(in_path, &data);
 
 	unsigned short int bytes_per_sample = header.bits_per_sample / BITS_PER_BYTE;
 
 	if (streq(steg_type, "LSB1")) {
 		hide_lsb1(out_file, vector, bytes_per_sample, data, marshalled_size);
 	} else if (streq(steg_type, "LSB4")) {
-		// hide_lsb4(vector, out_file, buffer_hide, payload_size, bytes_per_sample); //TODO
+		hide_lsb4(out_file, vector, bytes_per_sample, data, marshalled_size);
 	} else if (streq(steg_type, "LSBE")) {
 		// hide_lsb_enh(vector, out_file, buffer_hide, payload_size, bytes_per_sample); //TODO
 	}
@@ -180,7 +183,7 @@ void embed(char * in_path, char * p_path, char * out_path, char * steg_type, cha
 
 void extract(char * p_path, char * out_path, char * steg_type, char * password, enc_type enc_type, enc_mode enc_mode) {
 	printf("Valida\n");
-		if (empty(p_path) || empty(out_path) || empty(steg_type)) {
+	if (empty(p_path) || empty(out_path) || empty(steg_type)) {
 		fail(INVALID_OP, NULL);
 	}
 	// if ((enc_type == UNKNOWN_ENC_TYPE) != (enc_mode == UNKNOWN_ENC_MODE)
