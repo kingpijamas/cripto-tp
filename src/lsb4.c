@@ -51,7 +51,7 @@ int recover_lsb4(char * out_path, FILE * vector, unsigned short int sample_bytes
 		int i = 0;
 		char ext_c = 0;
 		do {
-			recover_bytes(&ext_c, vector, sample_bytes, sizeof(char));
+			recover_bytes_lsb4(&ext_c, vector, sample_bytes, sizeof(char));
 			extension[i] = ext_c;
 			i++;
 		} while (ext_c != '\0');

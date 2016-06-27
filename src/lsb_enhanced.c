@@ -59,7 +59,7 @@ int recover_lsb_enh(char * out_path, FILE * vector, unsigned short int sample_by
 		int i = 0;
 		char ext_c = 0;
 		do {
-			recover_bytes(&ext_c, vector, sample_bytes, sizeof(char));
+			recover_bytes_enh(&ext_c, vector, sample_bytes, sizeof(char));
 			extension[i] = ext_c;
 			i++;
 		} while (ext_c != '\0');

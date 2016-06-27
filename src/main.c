@@ -257,16 +257,8 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 		int size_bytes = sizeof(DWORD);
 		DWORD payload_bytes = 0;
 		memcpy(&payload_bytes, marshalled_data, size_bytes);
-		<<<<<<< e3e116c2392735dced8a12a56aa133e4139b0bfa
-		// printf("----SIZE----");
-		// for (int i=0; i < sizeof(DWORD); i++) {
-		// 	printf("\n");
-		// 	print_bits(((char *) &payload_bytes)[i]);
-		// }
-		// printf("\n----SIZE----\n\n");
-		// printf("payload_bytes: %lu\n", payload_bytes);
 
-		payload_bytes = __builtin_bswap64(payload_bytes);
+		payload_bytes = __builtin_bswap32(payload_bytes);
 		printf("----SIZE----");
 		for (int i = 0; i < sizeof(DWORD); i++) {
 			printf("\n");
@@ -276,9 +268,6 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 
 		printf("payload_bytes: %lu\n", payload_bytes);
 		printf("boom\n");
-		=======
-		payload_bytes = __builtin_bswap32(payload_bytes);
-		>>>>>>> Only LSB1 detected on files
 
 		char * payload = (char *) malloc(payload_bytes);
 		memcpy(payload, marshalled_data + size_bytes, payload_bytes);

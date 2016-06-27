@@ -2,7 +2,6 @@
 
 static void hide_bit(unsigned char *buffer, int size, unsigned char data_bit);
 static unsigned char lsb(unsigned char * buffer, int buffer_bytes);
-static int recover_bytes_lsb1(char * data, FILE * vector, unsigned short int sample_bytes, unsigned int bytes_to_read);
 static void print_bits(unsigned char num);
 
 void print_bits(unsigned char num){
@@ -50,10 +49,10 @@ void hide_bit(unsigned char * buffer, int buffer_size, unsigned char data_bit){
 int recover_lsb1(char * out_path, FILE * vector, unsigned short int sample_bytes, bool ext){
     // load body size
     DWORD data_size = 0;
-    int bytes_recovered = recover_bytes_lsb1((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
+    recover_bytes_lsb1((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
     data_size = __builtin_bswap32(data_size);
     char * data = (char *) calloc(data_size, sizeof(char));
-		bytes_recovered += recover_bytes_lsb1(data, vector, sample_bytes, data_size);
+	recover_bytes_lsb1(data, vector, sample_bytes, data_size);
 
     // printf("----PAYLOAD SENT----");
   	// for (int i=0; i<data_size; i++) {
