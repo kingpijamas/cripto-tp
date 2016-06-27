@@ -1,20 +1,20 @@
 #include "../include/marshall.h"
 
 static int read_file(char ** buffer, char * filename);
-static void print_bits(unsigned char num);
-
-void print_bits(unsigned char num) {
-	unsigned char size = sizeof(unsigned char);
-	unsigned char maxPow = 1 << (size * 8 - 1);
-
-	printf("'");
-	for (unsigned int i = 0; i < size * 8; i++) {
-		// print last bit and shift left.
-		printf("%u", (num & maxPow) ? 1 : 0);
-		num <<= 1;
-	}
-	printf("'");
-}
+// static void print_bits(unsigned char num);
+//
+// void print_bits(unsigned char num) {
+// 	unsigned char size = sizeof(unsigned char);
+// 	unsigned char maxPow = 1 << (size * 8 - 1);
+//
+// 	printf("'");
+// 	for (unsigned int i = 0; i < size * 8; i++) {
+// 		// print last bit and shift left.
+// 		printf("%u", (num & maxPow) ? 1 : 0);
+// 		num <<= 1;
+// 	}
+// 	printf("'");
+// }
 
 int marshall_plain(char * filename, char ** marshalled_data) {
 	char * extension = strrchr(filename, '.');
@@ -27,7 +27,6 @@ int marshall_plain(char * filename, char ** marshalled_data) {
 		return -1;
 	}
 	int marshalled_size = size_bytes + payload_bytes + extension_bytes;
-	// char
 	*marshalled_data = (char *) calloc(marshalled_size, sizeof(char));
 
 	DWORD flipped_payload_bytes = __builtin_bswap64(payload_bytes);
@@ -36,40 +35,30 @@ int marshall_plain(char * filename, char ** marshalled_data) {
 	memcpy((*marshalled_data) + size_bytes, *payload_buffer, payload_bytes);
 	memcpy((*marshalled_data) + size_bytes + payload_bytes, extension, extension_bytes);
 
-	// printf("marshalled_data:\n  size: %lu ", (*marshalled_data)[0]);
-	// print_bits((*marshalled_data)[0]);
-	// printf("\n- %d", 0);
-	// printf("\n  payload: '%s'", (*marshalled_data) + size_bytes);
-	// printf("\n- %d", size_bytes);
-	// printf("\n  extension: '%s'", (*marshalled_data) + size_bytes + payload_bytes);
-	// printf("\n- %d", payload_bytes + size_bytes);
-	// for (int i = 0; i < marshalled_size; i++) {
-	// 	printf("\n(%d)", i);
-	// 	print_bits((*marshalled_data)[i]);
-	// }
-	// printf("\n\n");
-
 	free(*payload_buffer);
 	free(payload_buffer);
 	return marshalled_size;
 }
 
-char * marshall_encrypted(char * filename) {
-	char ** payload_buffer = (char **) malloc(sizeof(char **));
+int marshall_encrypted(char * filename, char ** marshalled_data) {
+	char ** payload_buffer = (char **) calloc(1, sizeof(char **));
 
-	int payload_bytes = read_file(payload_buffer, filename);
-	if (payload_bytes == -1) {
-		return NULL;
-	}
 	int size_bytes = sizeof(DWORD);
-	int marshalled_size = size_bytes + payload_bytes + 1; // \0 has to be marshalled
+	DWORD payload_bytes = read_file(payload_buffer, filename);
+	if (payload_bytes == -1) {
+		return -1;
+	}
+	int marshalled_size = size_bytes + payload_bytes;
+	*marshalled_data = (char *) calloc(marshalled_size, sizeof(char));
 
-	char * marshalled_data = (char *) calloc(1, marshalled_size);
-	sprintf(marshalled_data, "%.*lu%s", size_bytes, (DWORD) payload_bytes, *payload_buffer);
+	DWORD flipped_payload_bytes = __builtin_bswap64(payload_bytes);
+
+	memcpy(*marshalled_data, &flipped_payload_bytes, size_bytes);
+	memcpy((*marshalled_data) + size_bytes, *payload_buffer, payload_bytes);
 
 	free(*payload_buffer);
 	free(payload_buffer);
-	return marshalled_data;
+	return marshalled_size;
 }
 
 int read_file(char ** buffer, char * filename) {

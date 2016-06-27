@@ -4,50 +4,50 @@ static int file_exists(char * path);
 static int streq(char * str1, char * str2);
 static int empty(char * str);
 static int valid_steg_algorithm(char * algorithm);
-static enc_type parse_enc_type(char * type);
-static enc_mode parse_enc_mode(char * mode);
+static ENC_TYPE parse_enc_type(char * type);
+static ENC_MODE parse_enc_mode(char * mode);
 static int has_suffix(char * str, char * suffix);
 static arg parse_arg(char * argument);
 static void expect_file_to_exist(char * path, error error_code);
 static void expect_suffix(char * param, char * suffix, error error_code);
 static void fail(error error_code, char * param);
 static void print_help();
-static void extract(char * p_path, char * out_path, char * steg_type, char * password, enc_type enc_type,
-		enc_mode enc_mode);
-static void embed(char * in_path, char * p_path, char * out_path, char * steg_type, char * password, enc_type enc_type,
-		enc_mode enc_mode);
+static void extract(char * p_path, char * out_path, char * steg_type, char * password, ENC_TYPE enc_type,
+		ENC_MODE enc_mode);
+static void embed(char * in_path, char * p_path, char * out_path, char * steg_type, char * password, ENC_TYPE enc_type,
+		ENC_MODE enc_mode);
 
 int main(int argc, char **argv) {
-	printf("Antes del help");
+	printf("Antes del help\n");
 	if (argc == 1 || (streq(argv[1], "-h") || streq(argv[1], "--help"))) {
 		print_help();
 		return SYS_OK;
 	}
-	printf("dps del help");
+	printf("dps del help\n");
 
 	comm command = NO_COMMAND;
-	int index;
-	char * in_path;	//archivo que se va a ocultar
-	char * p_path; 	//archivo que sera el portador
-	char * out_path; //archivo de salida
+	char * in_path = NULL;	//archivo que se va a ocultar
+	char * p_path = NULL; 	//archivo que sera el portador
+	char * out_path = NULL; //archivo de salida
 	//algoritmo de esteganografiado, encriptacion, modo y password
-	char * steg_type, *password;
-	enc_type enc_type = UNKNOWN_ENC_TYPE;
-	enc_mode enc_mode = UNKNOWN_ENC_MODE;
-	char * param;
-	for (index = 1; index < argc; index++) {
+	char * steg_type = NULL;
+	char * password = NULL;
+	ENC_TYPE enc_type = UNKNOWN_ENC_TYPE;
+	ENC_MODE enc_mode = UNKNOWN_ENC_MODE;
+	char * param = NULL;
+	for (int index = 1; index < argc; index++) {
 		arg argument = parse_arg(argv[index]);
 		switch (argument) {
 		when(EMBED_ARG)
-			printf("Embed");
+			printf("Embed\n");
 			command = EMBED;
 			break;
 		when(EXTRACT_ARG)
-			printf("Extract");
+			printf("Extract\n");
 			command = EXTRACT;
 			break;
 		when(IN_ARG)
-			printf("In");
+			printf("In\n");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
 			in_path = param;
 			break;
 		when(P_ARG)
-			printf("P arg");
+			printf("P arg\n");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 			p_path = param;
 			break;
 		when(OUT_ARG)
-			printf("Out arg");
+			printf("Out arg\n");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
 			out_path = param;
 			break;
 		when(STEG_ARG)
-			printf("Steg arg");
+			printf("Steg arg\n");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -88,21 +88,21 @@ int main(int argc, char **argv) {
 			steg_type = param;
 			break;
 		when(A_ARG)
-			printf("A arg");
+			printf("A arg\n");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
 			enc_type = parse_enc_type(argv[index]);
 			break;
 		when(M_ARG)
-			printf("M arg");
+			printf("M arg\n");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
 			enc_mode = parse_enc_mode(argv[index]);
 			break;
 		when(PASS_ARG)
-			printf("Pass Arg");
+			printf("Pass Arg\n");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
 
 	switch (command) {
 	when(EMBED)
-		printf("Embed entered");
+		printf("Embed entered\n");
 		embed(in_path, p_path, out_path, steg_type, password, enc_type, enc_mode);
 		return SYS_OK;
 	when(EXTRACT)
@@ -135,36 +135,40 @@ int main(int argc, char **argv) {
 		stegoanalyze(p_path);
 		break;
 	default:
-		printf("No command assigned!");
+		printf("No command assigned!\n");
 		exit(1);
 		break;
 	}
 	return SYS_OK;
 }
 
-void embed(char * in_path, char * p_path, char * out_path, char * steg_type, char * password, enc_type enc_type,
-		enc_mode enc_mode) {
+void embed(char * in_path, char * p_path, char * out_path, char * steg_type, char * password, ENC_TYPE enc_type,
+		ENC_MODE enc_mode) {
 	if (empty(in_path)) {
 		fail(INVALID_OP, NULL);
 	}
 	if (empty(p_path) || empty(out_path) || empty(steg_type)) {
 		fail(INVALID_OP, NULL);
 	}
-	// if ((enc_type == UNKNOWN_ENC_TYPE) != (enc_mode == UNKNOWN_ENC_MODE)
-	// 		|| (enc_mode == UNKNOWN_ENC_MODE) != empty(password)) {
-	// 	fail(INVALID_OP, NULL);
-	// }
+	bool encrypt = !empty(password);
+	if (encrypt && (enc_type == UNKNOWN_ENC_TYPE || enc_mode == UNKNOWN_ENC_MODE)) {
+		printf("%d %d '%s'\n", enc_type, enc_mode, password);
+		fail(INVALID_OP, NULL);
+	}
+
+	char * data = (char *) calloc(1, sizeof(char *));
+  int marshalled_size = marshall_plain(in_path, &data);
+
+	if (encrypt) {
+	 	in_path = encrypt_buffer(data, enc_type, enc_mode, password);
+		marshalled_size = marshall_encrypted(in_path, &data);
+	}
 
 	FILE * vector = fopen(p_path, "rb");
 	FILE * out_file = fopen(out_path, "wb");
-	FILE * hide_file = fopen(in_path, "rb");
 
 	WAV_HEADER header = parse_header(vector);
 	fwrite(&header, 1, sizeof(header), out_file);
-
-	char * data = (char *) calloc(1, sizeof(char *));
-	int marshalled_size = marshall_plain(in_path, &data);
-
 	unsigned short int bytes_per_sample = header.bits_per_sample / BITS_PER_BYTE;
 
 	if (streq(steg_type, "LSB1")) {
@@ -178,18 +182,16 @@ void embed(char * in_path, char * p_path, char * out_path, char * steg_type, cha
 	free(data);
 	fclose(vector);
 	fclose(out_file);
-	fclose(hide_file);
 }
 
-void extract(char * p_path, char * out_path, char * steg_type, char * password, enc_type enc_type, enc_mode enc_mode) {
-	printf("Valida\n");
+void extract(char * p_path, char * out_path, char * steg_type, char * password, ENC_TYPE enc_type, ENC_MODE enc_mode) {
 	if (empty(p_path) || empty(out_path) || empty(steg_type)) {
 		fail(INVALID_OP, NULL);
 	}
-	// if ((enc_type == UNKNOWN_ENC_TYPE) != (enc_mode == UNKNOWN_ENC_MODE)
-	// 		|| (enc_mode == UNKNOWN_ENC_MODE) != empty(password)) {
-	// 	fail(INVALID_OP, NULL);
-	// }
+	if ((enc_type == UNKNOWN_ENC_TYPE) != (enc_mode == UNKNOWN_ENC_MODE)
+			|| (enc_mode == UNKNOWN_ENC_MODE) != empty(password)) {
+		fail(INVALID_OP, NULL);
+	}
 
 	FILE * vector = fopen(p_path, "rb");
 	WAV_HEADER header = parse_header(vector);
@@ -206,7 +208,7 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 	fclose(vector);
 }
 
-enc_type parse_enc_type(char * type) {
+ENC_TYPE parse_enc_type(char * type) {
 	if (streq(type, "aes128")) {
 		return AES128;
 	}
@@ -223,7 +225,7 @@ enc_type parse_enc_type(char * type) {
 	exit(-1);
 }
 
-enc_mode parse_enc_mode(char * mode) {
+ENC_MODE parse_enc_mode(char * mode) {
 	if (streq(mode, "ecb")) {
 		return ECB;
 	}

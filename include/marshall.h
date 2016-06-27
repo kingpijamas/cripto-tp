@@ -10,6 +10,6 @@
 #define MAX_EXT_LEN 10
 
 int marshall_plain(char * filename, char ** marshalled_data);
-char * marshall_encrypted(char * filename);
+int marshall_encrypted(char * filename, char ** marshalled_data);
 
 #endif

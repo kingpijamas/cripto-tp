@@ -1,6 +1,6 @@
 #include "../include/crypt.h"
 
-char * encrypt_buffer(char * buffer, enc_type type, enc_mode mode, char * password) {
+char * encrypt_buffer(char * buffer, ENC_TYPE type, ENC_MODE mode, char * password) {
 	FILE * non_encrypted_file = fopen(NON_ENC_PATH, "wb");
 	if (non_encrypted_file) {
 		fwrite(buffer, strlen(buffer) + 1, 1, non_encrypted_file);
@@ -53,7 +53,7 @@ char * encrypt_buffer(char * buffer, enc_type type, enc_mode mode, char * passwo
 	return ENC_PATH;
 }
 
-char * decrypt_buffer(char * buffer, enc_type type, enc_mode mode, char * password) {
+char * decrypt_buffer(char * buffer, ENC_TYPE type, ENC_MODE mode, char * password) {
 	FILE * encrypted_file = fopen(ENC_PATH, "wb");
 	if (encrypted_file) {
 		fwrite(buffer, strlen(buffer) + 1, 1, encrypted_file);
