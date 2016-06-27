@@ -11,8 +11,8 @@
 
 #include "define.h"
 
-void hide_lsb_enh(FILE * vector, FILE * orig_file, unsigned short int sample_bytes, char * data);
+void hide_lsb_enh(FILE * vector, FILE * orig_file, unsigned short int sample_bytes, char * data, int bytes_to_hide);
 
-void recover_lsb_enh(FILE *fileptr, FILE *img_out, unsigned short int sample_size);
+int recover_lsb_enh(FILE * data_file, FILE * vector, unsigned short int sample_bytes);
 
 #endif // LSBENHANCED_H

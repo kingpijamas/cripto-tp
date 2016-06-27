@@ -172,7 +172,7 @@ void embed(char * in_path, char * p_path, char * out_path, char * steg_type, cha
 	} else if (streq(steg_type, "LSB4")) {
 		hide_lsb4(out_file, vector, bytes_per_sample, data, marshalled_size);
 	} else if (streq(steg_type, "LSBE")) {
-		// hide_lsb_enh(vector, out_file, buffer_hide, payload_size, bytes_per_sample); //TODO
+		hide_lsb_enh(out_file, vector, bytes_per_sample, data, marshalled_size);
 	}
 
 	free(data);
@@ -198,9 +198,9 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 	if (streq(steg_type, "LSB1")) {
 		recover_lsb1(out_path, vector, bytes_per_sample); //TODO
 	} else if (streq(steg_type, "LSB4")) {
-		// recover_lsb4(vector, out_file, bytes_per_sample); //TODO
+		recover_lsb4(out_file, vector, bytes_per_sample); //TODO
 	} else if (streq(steg_type, "LSBE")) {
-		// recover_lsb_enh(vector, out_file, bytes_per_sample); //TODO
+		recover_lsb_enh(out_file, vector, bytes_per_sample); //TODO
 	}
 
 	fclose(vector);
