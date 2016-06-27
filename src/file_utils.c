@@ -26,5 +26,6 @@ int create_file(char * base_path, char * extension, char * data, int data_size) 
 	printf("bytes_written: %d\n", bytes_written);
 
 	free(filename);
+	fclose(data_file);
 	return bytes_written;
 }

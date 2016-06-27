@@ -77,7 +77,6 @@ int recover_bytes_enh(char * data, FILE * vector, unsigned short int sample_byte
 	unsigned int bytes_read = 0;
 	unsigned int bits_read = 0;
 
-	printf("\nbytes_to_read: %d\n", bytes_to_read);
 	while (bytes_read < bytes_to_read) {
 		fread(vector_buffer, 1, sample_bytes, vector); // TODO: == -1 ?
 

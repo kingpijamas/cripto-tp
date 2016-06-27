@@ -8,7 +8,6 @@ void hide_lsb4(FILE * vector, FILE * orig_file, unsigned short int sample_bytes,
 	unsigned char bits_to_hide;
 	unsigned char * buffer = (unsigned char *) calloc(1, sizeof(char));
 
-	printf("\ndata: %s\n\n", data);
 	//leo un sample a la vez
 	while ((input_bytes_read = fread(buffer, BYTE_SIZE, sample_bytes, orig_file)) > 0) {
 		if (bits_hidden >= BITS_PER_BYTE) { //si ya lei todo un byte agarro el que sigue
@@ -71,7 +70,6 @@ int recover_bytes_lsb4(char * data, FILE * vector, unsigned short int sample_byt
 	unsigned int bytes_read = 0;
 	unsigned int bits_read = 0;
 
-	printf("\nbytes_to_read: %d\n", bytes_to_read);
 	while (bytes_read < bytes_to_read) {
 		fread(vector_buffer, 1, sample_bytes, vector); // TODO: == -1 ?
 

@@ -19,17 +19,17 @@ static void embed(char * in_path, char * p_path, char * out_path, char * steg_ty
 
 static void print_bits(unsigned char num);
 
-void print_bits(unsigned char num){
-    unsigned char size = sizeof(unsigned char);
-    unsigned char maxPow = 1 << (size * 8 - 1);
+void print_bits(unsigned char num) {
+	unsigned char size = sizeof(unsigned char);
+	unsigned char maxPow = 1 << (size * 8 - 1);
 
-    printf("'");
-    for(unsigned int i=0; i < size * 8; i++){
-      // print last bit and shift left.
-      printf("%u", (num & maxPow) ? 1 : 0);
-      num <<= 1;
-    }
-    printf("'");
+	printf("'");
+	for (unsigned int i = 0; i < size * 8; i++) {
+		// print last bit and shift left.
+		printf("%u", (num & maxPow) ? 1 : 0);
+		num <<= 1;
+	}
+	printf("'");
 }
 
 int main(int argc, char **argv) {
@@ -60,6 +60,10 @@ int main(int argc, char **argv) {
 		when(EXTRACT_ARG)
 			printf("Extract\n");
 			command = EXTRACT;
+			break;
+		when(ANALYZE_ARG)
+			printf("Analyze\n");
+			command = ANALYZE;
 			break;
 		when(IN_ARG)
 			printf("In\n");
@@ -147,7 +151,7 @@ int main(int argc, char **argv) {
 		extract(p_path, out_path, steg_type, password, enc_type, enc_mode);
 		return SYS_OK;
 	when(ANALYZE)
-		// stegoanalyze(p_path);
+		stegoanalyze(p_path);
 		break;
 	default:
 		printf("No command assigned!\n");
@@ -173,11 +177,11 @@ void embed(char * in_path, char * p_path, char * out_path, char * steg_type, cha
 	}
 
 	char * marshalled_data = (char *) calloc(1, sizeof(char *));
-  int marshalled_size = marshall_plain(in_path, &marshalled_data);
+	int marshalled_size = marshall_plain(in_path, &marshalled_data);
 	printf("path: %s\nmarshalled_size (DEC): %d\n", in_path, marshalled_size);
 
 	if (encrypt) {
-	 	in_path = encrypt_buffer(marshalled_data, marshalled_size, enc_type, enc_mode, password);
+		in_path = encrypt_buffer(marshalled_data, marshalled_size, enc_type, enc_mode, password);
 		marshalled_size = marshall_encrypted(in_path, &marshalled_data);
 		printf("path: %s\nmarshalled_size (CYP): %d\n", in_path, marshalled_size);
 	}
@@ -236,11 +240,11 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 		read_file(&encrypted_data, recovery_path); // TODO == -1?
 		printf("bytes_recovered: %d\n", bytes_recovered);
 		// printf("----PAYLOAD----");
-  	// for (int i=0; i<sizeof(DWORD)+16; i++) {
-  	// 	printf("\n");
-  	// 	print_bits(encrypted_data[i]);
-  	// }
-  	// printf("\n----PAYLOAD----\n\n");
+		// for (int i=0; i<sizeof(DWORD)+16; i++) {
+		// 	printf("\n");
+		// 	print_bits(encrypted_data[i]);
+		// }
+		// printf("\n----PAYLOAD----\n\n");
 
 		// print_bits();
 		// printf("%s\n", encrypted_data);
@@ -253,24 +257,28 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 		int size_bytes = sizeof(DWORD);
 		DWORD payload_bytes = 0;
 		memcpy(&payload_bytes, marshalled_data, size_bytes);
+		<<<<<<< e3e116c2392735dced8a12a56aa133e4139b0bfa
 		// printf("----SIZE----");
-  	// for (int i=0; i < sizeof(DWORD); i++) {
-  	// 	printf("\n");
-  	// 	print_bits(((char *) &payload_bytes)[i]);
-  	// }
-  	// printf("\n----SIZE----\n\n");
+		// for (int i=0; i < sizeof(DWORD); i++) {
+		// 	printf("\n");
+		// 	print_bits(((char *) &payload_bytes)[i]);
+		// }
+		// printf("\n----SIZE----\n\n");
 		// printf("payload_bytes: %lu\n", payload_bytes);
 
 		payload_bytes = __builtin_bswap64(payload_bytes);
 		printf("----SIZE----");
-  	for (int i=0; i < sizeof(DWORD); i++) {
-  		printf("\n");
-  		print_bits(((char *) &payload_bytes)[i]);
-  	}
-  	printf("\n----SIZE----\n\n");
+		for (int i = 0; i < sizeof(DWORD); i++) {
+			printf("\n");
+			print_bits(((char *) &payload_bytes)[i]);
+		}
+		printf("\n----SIZE----\n\n");
 
 		printf("payload_bytes: %lu\n", payload_bytes);
 		printf("boom\n");
+		=======
+		payload_bytes = __builtin_bswap32(payload_bytes);
+		>>>>>>> Only LSB1 detected on files
 
 		char * payload = (char *) malloc(payload_bytes);
 		memcpy(payload, marshalled_data + size_bytes, payload_bytes);
@@ -326,6 +334,9 @@ arg parse_arg(char * argument) {
 	}
 	if (streq(argument, "-extract")) {
 		return EXTRACT_ARG;
+	}
+	if (streq(argument, "-analyze")) {
+		return ANALYZE_ARG;
 	}
 	if (streq(argument, "-in")) {
 		return IN_ARG;
