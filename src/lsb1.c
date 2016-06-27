@@ -47,36 +47,36 @@ void hide_bit(unsigned char * buffer, int buffer_size, unsigned char data_bit){
   buffer[last_idx] = (buffer[last_idx] & ~0x01) | data_bit;
 }
 
-int recover_lsb1(char * base_out_path, FILE * vector, unsigned short int sample_bytes){
-    // load body size
-    DWORD data_size = 0;
-    int bytes_recovered = recover_bytes((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
-    data_size = __builtin_bswap64(data_size);
+int recover_lsb1(char * base_out_path, FILE * vector, unsigned short int sample_bytes) {
+	// load body size
+	DWORD data_size = 0;
+	int bytes_recovered = recover_bytes((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
+	data_size = __builtin_bswap64(data_size);
 
-    // load body
-    char * data = (char *) calloc(data_size, sizeof(char));
-    bytes_recovered += recover_bytes(data, vector, sample_bytes, data_size);
+	// load body
+	char * data = (char *) calloc(data_size, sizeof(char));
+	bytes_recovered += recover_bytes(data, vector, sample_bytes, data_size);
 
-    // load extension
-    char extension[MAX_EXT_LEN + 1] = { '\0' };
-    int i = 0;
-    char ext_c = 0;
-    do {
-      recover_bytes(&ext_c, vector, sample_bytes, sizeof(char));
-      extension[i] = ext_c;
-      i++;
-    } while(ext_c != '\0');
+	// load extension
+	char extension[MAX_EXT_LEN + 1] = { '\0' };
+	int i = 0;
+	char ext_c = 0;
+	do {
+		recover_bytes(&ext_c, vector, sample_bytes, sizeof(char));
+		extension[i] = ext_c;
+		i++;
+	} while (ext_c != '\0');
 
-    // save all to new file
-    char * filename = (char *) calloc(strlen(base_out_path) + strlen(extension) + 1, sizeof(char));
-    sprintf(filename, "%s%s", base_out_path, extension);
+	// save all to new file
+	char * filename = (char *) calloc(strlen(base_out_path) + strlen(extension) + 1, sizeof(char));
+	sprintf(filename, "%s%s", base_out_path, extension);
 
-    FILE * data_file = fopen(filename, "wb+");
-    fwrite(data, data_size, 1, data_file);
+	FILE * data_file = fopen(filename, "wb+");
+	fwrite(data, data_size, 1, data_file);
 
-    free(filename);
-    free(data);
-    return bytes_recovered;
+	free(filename);
+	free(data);
+	return bytes_recovered;
 }
 
 int recover_bytes(char * data, FILE * vector, unsigned short int sample_bytes, unsigned int bytes_to_read) {
