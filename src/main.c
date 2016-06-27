@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
 		extract(p_path, out_path, steg_type, password, enc_type, enc_mode);
 		return SYS_OK;
 	when(ANALYZE)
-		stegoanalyze(p_path);
+		// stegoanalyze(p_path);
 		break;
 	default:
 		printf("No command assigned!\n");
@@ -152,7 +152,6 @@ void embed(char * in_path, char * p_path, char * out_path, char * steg_type, cha
 	}
 	bool encrypt = !empty(password);
 	if (encrypt && (enc_type == UNKNOWN_ENC_TYPE || enc_mode == UNKNOWN_ENC_MODE)) {
-		printf("%d %d '%s'\n", enc_type, enc_mode, password);
 		fail(INVALID_OP, NULL);
 	}
 
@@ -188,8 +187,8 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 	if (empty(p_path) || empty(out_path) || empty(steg_type)) {
 		fail(INVALID_OP, NULL);
 	}
-	if ((enc_type == UNKNOWN_ENC_TYPE) != (enc_mode == UNKNOWN_ENC_MODE)
-			|| (enc_mode == UNKNOWN_ENC_MODE) != empty(password)) {
+	bool encrypt = !empty(password);
+	if (encrypt && (enc_type == UNKNOWN_ENC_TYPE || enc_mode == UNKNOWN_ENC_MODE)) {
 		fail(INVALID_OP, NULL);
 	}
 
@@ -197,12 +196,22 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 	WAV_HEADER header = parse_header(vector);
 	int bytes_per_sample = header.bits_per_sample / BITS_PER_BYTE;
 
+	char * recovery_path = out_path;
+	if (encrypt) {
+		recovery_path = ENC_PATH;
+	}
+
 	if (streq(steg_type, "LSB1")) {
-		recover_lsb1(out_path, vector, bytes_per_sample); //TODO
+		recover_lsb1(recovery_path, vector, bytes_per_sample); //TODO
 	} else if (streq(steg_type, "LSB4")) {
-		recover_lsb4(out_path, vector, bytes_per_sample); //TODO
+		recover_lsb4(recovery_path, vector, bytes_per_sample); //TODO
 	} else if (streq(steg_type, "LSBE")) {
-		recover_lsb_enh(out_path, vector, bytes_per_sample); //TODO
+		recover_lsb_enh(recovery_path, vector, bytes_per_sample); //TODO
+	}
+
+	if (encrypt) {
+		// decrypt_buffer(data, enc_type, enc_mode, password);
+		// marshalled_size = marshall_encrypted(in_path, &data);
 	}
 
 	fclose(vector);

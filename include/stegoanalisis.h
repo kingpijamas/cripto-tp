@@ -3,6 +3,6 @@
 
 #include "define.h"
 
-void stegoanalyze( p_path);
+// void stegoanalyze( p_path);
 
 #endif // STEGOANALISIS_H

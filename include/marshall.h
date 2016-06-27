@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "wav_header_utils.h" // FIXME
+#include "file_utils.h"
+// #include "wav_header_utils.h" // FIXME
 
 #define MAX_EXT_LEN 10
 
