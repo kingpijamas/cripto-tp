@@ -11,10 +11,10 @@ typedef enum {
 	true, false
 } bool;
 
-typedef unsigned long DWORD;
+typedef unsigned int DWORD;
 
 #define BYTE_SIZE 		1
-#define BITS_PER_BYTE 8
+#define BITS_PER_BYTE   8
 #define when(name) case(name):;
 
 #endif // DEFINE_H

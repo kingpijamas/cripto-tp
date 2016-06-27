@@ -7,8 +7,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-typedef unsigned long DWORD;
-
 typedef struct WAV_HEADER {
 	unsigned char riff[4];				// RIFF string
 	unsigned int overall_size;			// overall size of file in bytes

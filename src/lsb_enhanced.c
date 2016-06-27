@@ -40,7 +40,7 @@ int recover_lsb_enh(char * out_path, FILE * vector, unsigned short int sample_by
 	// load body size
 	DWORD data_size = 0;
 	int bytes_recovered = recover_bytes_enh((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
-	data_size = __builtin_bswap64(data_size);
+	data_size = __builtin_bswap32(data_size);
 
 	// load body
 	char * data = (char *) calloc(data_size, sizeof(char));

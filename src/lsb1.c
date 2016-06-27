@@ -50,19 +50,10 @@ void hide_bit(unsigned char * buffer, int buffer_size, unsigned char data_bit){
 int recover_lsb1(char * out_path, FILE * vector, unsigned short int sample_bytes, bool ext){
     // load body size
     DWORD data_size = 0;
-    recover_bytes((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
-    data_size = __builtin_bswap64(data_size);
-
-    // printf("----SIZE----");
-  	// for (int i=0; i<sizeof(DWORD); i++) {
-  	// 	printf("\n");
-  	// 	print_bits(((char *) &data_size)[i]);
-  	// }
-  	// printf("\n----SIZE----(%lu)\n", data_size);
-
-    // load body
+    int bytes_recovered = recover_bytes_lsb1((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
+    data_size = __builtin_bswap32(data_size);
     char * data = (char *) calloc(data_size, sizeof(char));
-    recover_bytes(data, vector, sample_bytes, data_size);
+		bytes_recovered += recover_bytes_lsb1(data, vector, sample_bytes, data_size);
 
     // printf("----PAYLOAD SENT----");
   	// for (int i=0; i<data_size; i++) {
@@ -78,12 +69,11 @@ int recover_lsb1(char * out_path, FILE * vector, unsigned short int sample_bytes
       int i = 0;
       char ext_c = 0;
       do {
-        recover_bytes(&ext_c, vector, sample_bytes, sizeof(char));
+    	  recover_bytes_lsb1(&ext_c, vector, sample_bytes, sizeof(char));
         extension[i] = ext_c;
         i++;
       } while(ext_c != '\0');
     }
-
     // save all to new file
     int bytes_recovered = create_file(out_path, extension, data, data_size);
     free(data);

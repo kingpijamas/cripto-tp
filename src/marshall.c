@@ -28,7 +28,7 @@ int marshall_plain(char * filename, char ** marshalled_data) {
 	int marshalled_size = size_bytes + payload_bytes + extension_bytes;
 	*marshalled_data = (char *) calloc(marshalled_size, sizeof(char));
 
-	DWORD flipped_payload_bytes = __builtin_bswap64(payload_bytes);
+	DWORD flipped_payload_bytes = __builtin_bswap32(payload_bytes);
 
 	memcpy(*marshalled_data, &flipped_payload_bytes, size_bytes);
 	memcpy((*marshalled_data) + size_bytes, *payload_buffer, payload_bytes);
@@ -57,7 +57,7 @@ int marshall_encrypted(char * filename, char ** marshalled_data) {
 	}
 	printf("\n----SIZE----(%lu)\n\n", payload_bytes);
 
-	DWORD flipped_payload_bytes = __builtin_bswap64(payload_bytes);
+	DWORD flipped_payload_bytes = __builtin_bswap32(payload_bytes);
 
 	memcpy(*marshalled_data, &flipped_payload_bytes, size_bytes);
 	memcpy((*marshalled_data) + size_bytes, *payload_buffer, payload_bytes);
