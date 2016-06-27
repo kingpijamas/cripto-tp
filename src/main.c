@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
 	if (command == NO_COMMAND) {
 		fail(INVALID_OP, NULL);
 	}
-	printf("Parameters OK!\n");
+	printf("\nParameters OK!\n");
 
 	switch (command) {
 	when(EMBED)
@@ -144,6 +144,8 @@ int main(int argc, char **argv) {
 
 void embed(char * in_path, char * p_path, char * out_path, char * steg_type, char * password, ENC_TYPE enc_type,
 		ENC_MODE enc_mode) {
+	printf("\n\nEMBED\n");
+
 	if (empty(in_path)) {
 		fail(INVALID_OP, NULL);
 	}
@@ -184,6 +186,8 @@ void embed(char * in_path, char * p_path, char * out_path, char * steg_type, cha
 }
 
 void extract(char * p_path, char * out_path, char * steg_type, char * password, ENC_TYPE enc_type, ENC_MODE enc_mode) {
+	printf("\n\nEXTRACT\n");
+
 	if (empty(p_path) || empty(out_path) || empty(steg_type)) {
 		fail(INVALID_OP, NULL);
 	}
@@ -202,6 +206,7 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 	}
 
 	if (streq(steg_type, "LSB1")) {
+		printf("boom\n");
 		recover_lsb1(recovery_path, vector, bytes_per_sample);
 	} else if (streq(steg_type, "LSB4")) {
 		recover_lsb4(recovery_path, vector, bytes_per_sample);

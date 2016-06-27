@@ -69,13 +69,6 @@ int recover_lsb1(char * out_path, FILE * vector, unsigned short int sample_bytes
 
     // save all to new file
     create_file(out_path, extension, data, data_size);
-    // char * filename = (char *) calloc(strlen(out_path) + strlen(extension) + 1, sizeof(char));
-    // sprintf(filename, "%s%s", out_path, extension);
-    //
-    // FILE * data_file = fopen(filename, "wb+");
-    // fwrite(data, data_size, 1, data_file);
-    //
-    // free(filename);
     free(data);
     return bytes_recovered;
 }

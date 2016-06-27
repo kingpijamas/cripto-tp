@@ -30,7 +30,7 @@ void hide_lsb4(FILE * vector, FILE * orig_file, unsigned short int sample_bytes,
 	}
 }
 
-int recover_lsb4(char * base_out_path, FILE * vector, unsigned short int sample_bytes){
+int recover_lsb4(char * out_path, FILE * vector, unsigned short int sample_bytes){
     // load body size
     DWORD data_size = 0;
     int bytes_recovered = recover_bytes((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
@@ -51,13 +51,15 @@ int recover_lsb4(char * base_out_path, FILE * vector, unsigned short int sample_
     } while(ext_c != '\0');
 
     // save all to new file
-    char * filename = (char *) calloc(strlen(base_out_path) + strlen(extension) + 1, sizeof(char));
-    sprintf(filename, "%s%s", base_out_path, extension);
+    // char * filename = (char *) calloc(strlen(out_path) + strlen(extension) + 1, sizeof(char));
+    // sprintf(filename, "%s%s", out_path, extension);
+		//
+    // FILE * data_file = fopen(filename, "wb+");
+    // fwrite(data, data_size, 1, data_file);
+		//
+    // free(filename);
+		create_file(out_path, extension, data, data_size);
 
-    FILE * data_file = fopen(filename, "wb+");
-    fwrite(data, data_size, 1, data_file);
-
-    free(filename);
     free(data);
     return bytes_recovered;
 }
