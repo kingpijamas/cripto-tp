@@ -90,6 +90,7 @@ int main(int argc, char **argv) {
 			if (!valid_steg_algorithm(param)) {
 				fail(INVALID_STEG, param);
 			}
+			printf("Steg method: %s\n", param);
 			steg_type = param;
 			break;
 		when(A_ARG)

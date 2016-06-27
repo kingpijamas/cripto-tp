@@ -26,27 +26,21 @@ void hide_lsb4(FILE * vector, FILE * orig_file, unsigned short int sample_bytes,
 		}
 		fwrite(buffer, BYTE_SIZE, input_bytes_read, vector); // Writing read data into output file
 	}
+	if(bytes_to_hide > 0){
+		printf("NO TERMINO DE HIDEAR TODO!\n");
+		exit(1);
+	}
 }
 
 int recover_lsb4(char * out_path, FILE * vector, unsigned short int sample_bytes, bool ext) {
 	// load body size
 	DWORD data_size = 0;
 	recover_bytes_lsb4((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
-    data_size = __builtin_bswap32(data_size);
-
-	// load body
+	data_size = __builtin_bswap32(data_size);
 	char * data = (char *) calloc(data_size, sizeof(char));
 	recover_bytes_lsb4(data, vector, sample_bytes, data_size);
 
-	// load extension
 	char extension[MAX_EXT_LEN + 1] = { '\0' };
-	int i = 0;
-	char ext_c = 0;
-	do {
-		recover_bytes_lsb4(&ext_c, vector, sample_bytes, sizeof(char));
-		extension[i] = ext_c;
-		i++;
-	} while (ext_c != '\0');
 	if (ext) {
 		int i = 0;
 		char ext_c = 0;
@@ -56,9 +50,8 @@ int recover_lsb4(char * out_path, FILE * vector, unsigned short int sample_bytes
 			i++;
 		} while (ext_c != '\0');
 	}
-
+	// save all to new file
 	int bytes_recovered = create_file(out_path, extension, data, data_size);
-
 	free(data);
 	return bytes_recovered;
 }

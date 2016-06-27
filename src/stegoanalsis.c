@@ -8,14 +8,17 @@ void stegoanalyze(char * p_path) {
 	printf("STEGOANALYZING . . .\n");
 	FILE * vector = fopen(p_path, "rb");
 	WAV_HEADER header = parse_header(vector);
+	printf("\n");
 	testLSB1(vector, header);
 	fclose(vector);
 	vector = fopen(p_path, "rb");
 	header = parse_header(vector);
+	printf("\n");
 	testLSB4(vector, header);
 	fclose(vector);
 	vector = fopen(p_path, "rb");
 	header = parse_header(vector);
+	printf("\n");
 	testLSBEnh(vector, header);
 	fclose(vector);
 }
@@ -57,11 +60,11 @@ void testLSB1(FILE * vector, WAV_HEADER header) {
 		extension[i] = ext_c;
 		i++;
 	} while (ext_c != '\0');
-	printf("\n### File extension matches LSB1 format###\nIts extension is '%s'\n", extension);
+	printf("\n### File extension matches LSB1 format ###\nIts extension is '%s'\n", extension);
 	create_file("/tmp/stego", "", data, data_size);
 	char * command = (char *) calloc(120, sizeof(char));
 	printf("File type detection:\n");
-	strcpy(command, "file /tmp/stego | cut -d' ' -f2- && rm /tmp/stego");
+	strcpy(command, "file /tmp/stego | cut -d' ' -f2- | sed 's/^data/Undefined/g' && rm /tmp/stego");
 	system(command);
 }
 
@@ -102,11 +105,11 @@ void testLSB4(FILE * vector, WAV_HEADER header) {
 		extension[i] = ext_c;
 		i++;
 	} while (ext_c != '\0');
-	printf("\n### File extension matches LSB4 format###\nIts extension is '%s'\n", extension);
+	printf("\n### File extension matches LSB4 format ###\nIts extension is '%s'\n", extension);
 	create_file("/tmp/stego", "", data, data_size);
 	char * command = (char *) calloc(120, sizeof(char));
 	printf("File type detection:\n");
-	strcpy(command, "file /tmp/stego | cut -d' ' -f2- && rm /tmp/stego");
+	strcpy(command, "file /tmp/stego | cut -d' ' -f2- | sed 's/^data/Undefined/g' && rm /tmp/stego");
 	system(command);
 }
 
@@ -116,9 +119,9 @@ void testLSBEnh(FILE * vector, WAV_HEADER header) {
 	int bytes_recovered = recover_bytes_enh((char *) &data_size, vector, bytes_per_sample, sizeof(DWORD));
 	data_size = __builtin_bswap32(data_size);
 	printf("Data size: %u\n", data_size);
-	if (data_size * 8 * bytes_per_sample > header.overall_size) {
+	if (data_size * 8 > header.overall_size) {
 		printf("Is not LSBEnh\n\tREASON: %s\n", "File size and payload size mismatch");
-		printf("Needed (at least) size: %u\nFile size: %u\n", data_size * 8 * bytes_per_sample, header.overall_size);
+		printf("Needed (at least) size: %u\nFile size: %u\n", data_size * 8, header.overall_size);
 		return;
 	}
 	char * data = (char *) calloc(data_size, sizeof(char));
@@ -147,10 +150,10 @@ void testLSBEnh(FILE * vector, WAV_HEADER header) {
 		extension[i] = ext_c;
 		i++;
 	} while (ext_c != '\0');
-	printf("\n### File extension matches LSB Enhanced format###\nIts extension is '%s'\n", extension);
+	printf("\n### File extension matches LSB Enhanced format ###\nIts extension is '%s'\n", extension);
 	create_file("/tmp/stego", "", data, data_size);
 	char * command = (char *) calloc(120, sizeof(char));
 	printf("File type detection:\n");
-	strcpy(command, "file /tmp/stego | cut -d' ' -f2- && rm /tmp/stego");
+	strcpy(command, "file /tmp/stego | cut -d' ' -f2- | sed 's/^data/Undefined/g' && rm /tmp/stego");
 	system(command);
 }

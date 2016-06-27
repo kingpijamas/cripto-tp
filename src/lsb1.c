@@ -26,6 +26,10 @@ void hide_lsb1(FILE * vector, FILE * orig_file, unsigned short int sample_bytes,
 		}
 		fwrite(buffer, BYTE_SIZE, input_bytes_read, vector); // Writing read data into output file
 	}
+	if(bytes_to_hide > 0){
+		printf("NO TERMINO DE HIDEAR TODO!\n");
+		exit(1);
+	}
 }
 
 void hide_bit(unsigned char * buffer, int buffer_size, unsigned char data_bit) {
@@ -69,7 +73,6 @@ int recover_bytes_lsb1(char * data, FILE * vector, unsigned short int sample_byt
 
 		data_byte <<= 1;
 		data_byte |= lsb(vector_buffer, sample_bytes);
-
 		bits_read++;
 
 		if (bits_read == BITS_PER_BYTE) { //si ya lei todo un byte agarro el que sigue
