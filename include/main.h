@@ -7,6 +7,7 @@
 #include "lsb4.h"
 #include "lsb_enhanced.h"
 #include "marshall.h"
+#include "stegoanalisis.h"
 #include "wav_header_utils.h"
 
 #define WAV_EXT ".wav"
