@@ -2,7 +2,7 @@
 
 static void hide_bit(unsigned char *buffer, int size, unsigned char data_bit);
 static unsigned char lsb(unsigned char * buffer, int buffer_bytes);
-static int recover_bytes(char * data, FILE * vector, unsigned short int sample_bytes, unsigned int bytes_to_read);
+static int recover_bytes_lsb1(char * data, FILE * vector, unsigned short int sample_bytes, unsigned int bytes_to_read);
 static void print_bits(unsigned char num);
 
 void print_bits(unsigned char num){
@@ -90,7 +90,7 @@ int recover_lsb1(char * out_path, FILE * vector, unsigned short int sample_bytes
     return bytes_recovered;
 }
 
-int recover_bytes(char * data, FILE * vector, unsigned short int sample_bytes, unsigned int bytes_to_read) {
+int recover_bytes_lsb1(char * data, FILE * vector, unsigned short int sample_bytes, unsigned int bytes_to_read) {
   unsigned char * vector_buffer = (unsigned char *) calloc(sample_bytes, BYTE_SIZE);
   unsigned char data_byte = 0;
 

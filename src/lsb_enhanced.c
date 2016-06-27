@@ -2,7 +2,6 @@
 
 static unsigned char lsb(unsigned char * buffer, int buffer_bytes);
 static int hideBitEnh(unsigned char *buffer, int size, unsigned char img_bit);
-static int recover_bytes(char * data, FILE * vector, unsigned short int sample_bytes, unsigned int bytes_to_read);
 
 int hideBitEnh(unsigned char *buffer, int size, unsigned char img_bit) {
 	if (buffer[size - 1] < 254) {
@@ -38,34 +37,40 @@ void hide_lsb_enh(FILE * vector, FILE * orig_file, unsigned short int sample_byt
 }
 
 int recover_lsb_enh(char * out_path, FILE * vector, unsigned short int sample_bytes, bool ext) {
-    // load body size
-    DWORD data_size = 0;
-    int bytes_recovered = recover_bytes((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
-    data_size = __builtin_bswap64(data_size);
+	// load body size
+	DWORD data_size = 0;
+	int bytes_recovered = recover_bytes_enh((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
+	data_size = __builtin_bswap64(data_size);
 
-    // load body
-    char * data = (char *) calloc(data_size, sizeof(char));
-    bytes_recovered += recover_bytes(data, vector, sample_bytes, data_size);
+	// load body
+	char * data = (char *) calloc(data_size, sizeof(char));
+	bytes_recovered += recover_bytes_enh(data, vector, sample_bytes, data_size);
 
-    // load extension
-    char extension[MAX_EXT_LEN + 1] = { '\0' };
+	// load extension
+	char extension[MAX_EXT_LEN + 1] = { '\0' };
+	int i = 0;
+	char ext_c = 0;
+	do {
+		recover_bytes_enh(&ext_c, vector, sample_bytes, sizeof(char));
+		extension[i] = ext_c;
+		i++;
+	} while (ext_c != '\0');
+	if (ext) {
+		int i = 0;
+		char ext_c = 0;
+		do {
+			recover_bytes(&ext_c, vector, sample_bytes, sizeof(char));
+			extension[i] = ext_c;
+			i++;
+		} while (ext_c != '\0');
+	}
+	create_file(out_path, extension, data, data_size);
 
-		if (ext) {
-	    int i = 0;
-	    char ext_c = 0;
-	    do {
-	      recover_bytes(&ext_c, vector, sample_bytes, sizeof(char));
-	      extension[i] = ext_c;
-	      i++;
-	    } while(ext_c != '\0');
-		}
-		create_file(out_path, extension, data, data_size);
-
-    free(data);
-    return bytes_recovered;
+	free(data);
+	return bytes_recovered;
 }
 
-int recover_bytes(char * data, FILE * vector, unsigned short int sample_bytes, unsigned int bytes_to_read) {
+int recover_bytes_enh(char * data, FILE * vector, unsigned short int sample_bytes, unsigned int bytes_to_read) {
 	unsigned char * vector_buffer = (unsigned char *) calloc(sample_bytes, BYTE_SIZE);
 	unsigned char data_byte = 0;
 
