@@ -17,21 +17,6 @@ static void extract(char * p_path, char * out_path, char * steg_type, char * pas
 static void embed(char * in_path, char * p_path, char * out_path, char * steg_type, char * password, ENC_TYPE enc_type,
 		ENC_MODE enc_mode);
 
-static void print_bits(unsigned char num);
-
-void print_bits(unsigned char num) {
-	unsigned char size = sizeof(unsigned char);
-	unsigned char maxPow = 1 << (size * 8 - 1);
-
-	printf("'");
-	for (unsigned int i = 0; i < size * 8; i++) {
-		// print last bit and shift left.
-		printf("%u", (num & maxPow) ? 1 : 0);
-		num <<= 1;
-	}
-	printf("'");
-}
-
 int main(int argc, char **argv) {
 	printf("Antes del help\n");
 	if (argc == 1 || (streq(argv[1], "-h") || streq(argv[1], "--help"))) {
@@ -50,7 +35,8 @@ int main(int argc, char **argv) {
 	ENC_TYPE enc_type = UNKNOWN_ENC_TYPE;
 	ENC_MODE enc_mode = UNKNOWN_ENC_MODE;
 	char * param = NULL;
-	for (int index = 1; index < argc; index++) {
+	int index;
+	for (index = 1; index < argc; index++) {
 		arg argument = parse_arg(argv[index]);
 		switch (argument) {
 		when(EMBED_ARG)
@@ -238,37 +224,17 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 	if (decrypt) {
 		char * encrypted_data = (char *) malloc(sizeof(char *));
 		read_file(&encrypted_data, recovery_path); // TODO == -1?
-		printf("bytes_recovered: %d\n", bytes_recovered);
-		// printf("----PAYLOAD----");
-		// for (int i=0; i<sizeof(DWORD)+16; i++) {
-		// 	printf("\n");
-		// 	print_bits(encrypted_data[i]);
-		// }
-		// printf("\n----PAYLOAD----\n\n");
-
-		// print_bits();
-		// printf("%s\n", encrypted_data);
+		
 		char * decrypted_file_path = decrypt_buffer(encrypted_data, bytes_recovered, enc_type, enc_mode, password);
-		// printf("decrypted_file_path: %s\n", decrypted_file_path);
-
+		
 		char * marshalled_data = (char *) malloc(sizeof(char *));
 		read_file(&marshalled_data, decrypted_file_path); // TODO == -1?
 
 		int size_bytes = sizeof(DWORD);
 		DWORD payload_bytes = 0;
 		memcpy(&payload_bytes, marshalled_data, size_bytes);
-
 		payload_bytes = __builtin_bswap32(payload_bytes);
-		printf("----SIZE----");
-		for (int i = 0; i < sizeof(DWORD); i++) {
-			printf("\n");
-			print_bits(((char *) &payload_bytes)[i]);
-		}
-		printf("\n----SIZE----\n\n");
-
-		printf("payload_bytes: %u\n", payload_bytes);
-		printf("boom\n");
-
+		
 		char * payload = (char *) malloc(payload_bytes);
 		memcpy(payload, marshalled_data + size_bytes, payload_bytes);
 

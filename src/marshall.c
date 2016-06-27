@@ -1,20 +1,5 @@
 #include "../include/marshall.h"
 
-static void print_bits(unsigned char num);
-
-void print_bits(unsigned char num) {
-	unsigned char size = sizeof(unsigned char);
-	unsigned char maxPow = 1 << (size * 8 - 1);
-
-	printf("'");
-	for (unsigned int i = 0; i < size * 8; i++) {
-		// print last bit and shift left.
-		printf("%u", (num & maxPow) ? 1 : 0);
-		num <<= 1;
-	}
-	printf("'");
-}
-
 int marshall_plain(char * filename, char ** marshalled_data) {
 	char * extension = strrchr(filename, '.');
 	char ** payload_buffer = (char **) calloc(1, sizeof(char **));
@@ -49,13 +34,6 @@ int marshall_encrypted(char * filename, char ** marshalled_data) {
 	}
 	int marshalled_size = size_bytes + payload_bytes;
 	*marshalled_data = (char *) calloc(marshalled_size, sizeof(char));
-
-	printf("----SIZE----");
-	for (int i=0; i<sizeof(DWORD); i++) {
-		printf("\n");
-		print_bits(((char *) &payload_bytes)[i]);
-	}
-	printf("\n----SIZE----(%u)\n\n", payload_bytes);
 
 	DWORD flipped_payload_bytes = __builtin_bswap32(payload_bytes);
 

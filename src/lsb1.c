@@ -2,20 +2,6 @@
 
 static void hide_bit(unsigned char *buffer, int size, unsigned char data_bit);
 static unsigned char lsb(unsigned char * buffer, int buffer_bytes);
-static void print_bits(unsigned char num);
-
-void print_bits(unsigned char num) {
-	unsigned char size = sizeof(unsigned char);
-	unsigned char maxPow = 1 << (size * 8 - 1);
-
-	printf("'");
-	for (unsigned int i = 0; i < size * 8; i++) {
-		// print last bit and shift left.
-		printf("%u", (num & maxPow) ? 1 : 0);
-		num <<= 1;
-	}
-	printf("'");
-}
 
 void hide_lsb1(FILE * vector, FILE * orig_file, unsigned short int sample_bytes, char * data,
 		unsigned int bytes_to_hide) { // TODO: unsigned long
@@ -55,16 +41,7 @@ int recover_lsb1(char * out_path, FILE * vector, unsigned short int sample_bytes
 	char * data = (char *) calloc(data_size, sizeof(char));
 	recover_bytes_lsb1(data, vector, sample_bytes, data_size);
 
-	// printf("----PAYLOAD SENT----");
-	// for (int i=0; i<data_size; i++) {
-	// 	printf("\n");
-	// 	print_bits(data[i]);
-	// }
-	// printf("\n----PAYLOAD SENT----\n\n");
-
-	// load extension
 	char extension[MAX_EXT_LEN + 1] = { '\0' };
-
 	if (ext) {
 		int i = 0;
 		char ext_c = 0;
