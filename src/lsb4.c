@@ -31,12 +31,12 @@ void hide_lsb4(FILE * vector, FILE * orig_file, unsigned short int sample_bytes,
 int recover_lsb4(char * out_path, FILE * vector, unsigned short int sample_bytes, bool ext) {
 	// load body size
 	DWORD data_size = 0;
-	int bytes_recovered = recover_bytes_lsb4((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
+	recover_bytes_lsb4((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
     data_size = __builtin_bswap32(data_size);
 
 	// load body
 	char * data = (char *) calloc(data_size, sizeof(char));
-	bytes_recovered += recover_bytes_lsb4(data, vector, sample_bytes, data_size);
+	recover_bytes_lsb4(data, vector, sample_bytes, data_size);
 
 	// load extension
 	char extension[MAX_EXT_LEN + 1] = { '\0' };
@@ -57,7 +57,7 @@ int recover_lsb4(char * out_path, FILE * vector, unsigned short int sample_bytes
 		} while (ext_c != '\0');
 	}
 
-	create_file(out_path, extension, data, data_size);
+	int bytes_recovered = create_file(out_path, extension, data, data_size);
 
 	free(data);
 	return bytes_recovered;
