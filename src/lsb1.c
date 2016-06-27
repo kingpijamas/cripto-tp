@@ -70,7 +70,6 @@ int recover_lsb1(char * out_path, FILE * vector, unsigned short int sample_bytes
       } while(ext_c != '\0');
     }
 
-    printf("boom\n");
     // save all to new file
     create_file(out_path, extension, data, data_size);
     free(data);

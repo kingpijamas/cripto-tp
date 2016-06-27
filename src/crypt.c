@@ -54,6 +54,7 @@ char * encrypt_buffer(char * buffer, ENC_TYPE type, ENC_MODE mode, char * passwo
 }
 
 char * decrypt_buffer(char * buffer, ENC_TYPE type, ENC_MODE mode, char * password) {
+	// printf("%s\n", buffer);
 	FILE * encrypted_file = fopen(ENC_PATH, "wb");
 	if (encrypted_file) {
 		fwrite(buffer, strlen(buffer) + 1, 1, encrypted_file);
@@ -103,5 +104,5 @@ char * decrypt_buffer(char * buffer, ENC_TYPE type, ENC_MODE mode, char * passwo
 	strcat(command, "rm ");
 	strcat(command, ENC_PATH);
 	system(command);
-	return *command;
+	return NON_ENC_PATH;
 }
