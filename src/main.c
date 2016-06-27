@@ -17,6 +17,21 @@ static void extract(char * p_path, char * out_path, char * steg_type, char * pas
 static void embed(char * in_path, char * p_path, char * out_path, char * steg_type, char * password, ENC_TYPE enc_type,
 		ENC_MODE enc_mode);
 
+static void print_bits(unsigned char num);
+
+void print_bits(unsigned char num){
+    unsigned char size = sizeof(unsigned char);
+    unsigned char maxPow = 1 << (size * 8 - 1);
+
+    printf("'");
+    for(unsigned int i=0; i < size * 8; i++){
+      // print last bit and shift left.
+      printf("%u", (num & maxPow) ? 1 : 0);
+      num <<= 1;
+    }
+    printf("'");
+}
+
 int main(int argc, char **argv) {
 	printf("Antes del help\n");
 	if (argc == 1 || (streq(argv[1], "-h") || streq(argv[1], "--help"))) {
@@ -157,30 +172,32 @@ void embed(char * in_path, char * p_path, char * out_path, char * steg_type, cha
 		fail(INVALID_OP, NULL);
 	}
 
-	char * data = (char *) calloc(1, sizeof(char *));
-  int marshalled_size = marshall_plain(in_path, &data);
+	char * marshalled_data = (char *) calloc(1, sizeof(char *));
+  int marshalled_size = marshall_plain(in_path, &marshalled_data);
+	printf("path: %s\nmarshalled_size (DEC): %d\n", in_path, marshalled_size);
 
 	if (encrypt) {
-	 	in_path = encrypt_buffer(data, enc_type, enc_mode, password);
-		marshalled_size = marshall_encrypted(in_path, &data);
+	 	in_path = encrypt_buffer(marshalled_data, marshalled_size, enc_type, enc_mode, password);
+		marshalled_size = marshall_encrypted(in_path, &marshalled_data);
+		printf("path: %s\nmarshalled_size (CYP): %d\n", in_path, marshalled_size);
 	}
 
 	FILE * vector = fopen(p_path, "rb");
-	FILE * out_file = fopen(out_path, "wb");
+	FILE * out_file = fopen(out_path, "wb+");
 
 	WAV_HEADER header = parse_header(vector);
 	fwrite(&header, 1, sizeof(header), out_file);
 	unsigned short int bytes_per_sample = header.bits_per_sample / BITS_PER_BYTE;
 
 	if (streq(steg_type, "LSB1")) {
-		hide_lsb1(out_file, vector, bytes_per_sample, data, marshalled_size);
+		hide_lsb1(out_file, vector, bytes_per_sample, marshalled_data, marshalled_size);
 	} else if (streq(steg_type, "LSB4")) {
-		hide_lsb4(out_file, vector, bytes_per_sample, data, marshalled_size);
+		hide_lsb4(out_file, vector, bytes_per_sample, marshalled_data, marshalled_size);
 	} else if (streq(steg_type, "LSBE")) {
-		hide_lsb_enh(out_file, vector, bytes_per_sample, data, marshalled_size);
+		hide_lsb_enh(out_file, vector, bytes_per_sample, marshalled_data, marshalled_size);
 	}
 
-	free(data);
+	free(marshalled_data);
 	fclose(vector);
 	fclose(out_file);
 }
@@ -205,19 +222,30 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 		recovery_path = ENC_PATH;
 	}
 
+	int bytes_recovered;
 	if (streq(steg_type, "LSB1")) {
-		recover_lsb1(recovery_path, vector, bytes_per_sample, !decrypt);
+		bytes_recovered = recover_lsb1(recovery_path, vector, bytes_per_sample, !decrypt);
 	} else if (streq(steg_type, "LSB4")) {
-		recover_lsb4(recovery_path, vector, bytes_per_sample, !decrypt);
+		bytes_recovered = recover_lsb4(recovery_path, vector, bytes_per_sample, !decrypt);
 	} else if (streq(steg_type, "LSBE")) {
-		recover_lsb_enh(recovery_path, vector, bytes_per_sample, !decrypt);
+		bytes_recovered = recover_lsb_enh(recovery_path, vector, bytes_per_sample, !decrypt);
 	}
 
 	if (decrypt) {
 		char * encrypted_data = (char *) malloc(sizeof(char *));
 		read_file(&encrypted_data, recovery_path); // TODO == -1?
+		printf("bytes_recovered: %d\n", bytes_recovered);
+		// printf("----PAYLOAD----");
+  	// for (int i=0; i<sizeof(DWORD)+16; i++) {
+  	// 	printf("\n");
+  	// 	print_bits(encrypted_data[i]);
+  	// }
+  	// printf("\n----PAYLOAD----\n\n");
 
-		char * decrypted_file_path = decrypt_buffer(encrypted_data, enc_type, enc_mode, password);
+		// print_bits();
+		// printf("%s\n", encrypted_data);
+		char * decrypted_file_path = decrypt_buffer(encrypted_data, bytes_recovered, enc_type, enc_mode, password);
+		// printf("decrypted_file_path: %s\n", decrypted_file_path);
 
 		char * marshalled_data = (char *) malloc(sizeof(char *));
 		read_file(&marshalled_data, decrypted_file_path); // TODO == -1?
@@ -225,7 +253,24 @@ void extract(char * p_path, char * out_path, char * steg_type, char * password, 
 		int size_bytes = sizeof(DWORD);
 		DWORD payload_bytes = 0;
 		memcpy(&payload_bytes, marshalled_data, size_bytes);
+		// printf("----SIZE----");
+  	// for (int i=0; i < sizeof(DWORD); i++) {
+  	// 	printf("\n");
+  	// 	print_bits(((char *) &payload_bytes)[i]);
+  	// }
+  	// printf("\n----SIZE----\n\n");
+		// printf("payload_bytes: %lu\n", payload_bytes);
+
 		payload_bytes = __builtin_bswap64(payload_bytes);
+		printf("----SIZE----");
+  	for (int i=0; i < sizeof(DWORD); i++) {
+  		printf("\n");
+  		print_bits(((char *) &payload_bytes)[i]);
+  	}
+  	printf("\n----SIZE----\n\n");
+
+		printf("payload_bytes: %lu\n", payload_bytes);
+		printf("boom\n");
 
 		char * payload = (char *) malloc(payload_bytes);
 		memcpy(payload, marshalled_data + size_bytes, payload_bytes);

@@ -11,8 +11,8 @@ typedef enum {
 	UNKNOWN_ENC_MODE, ECB, CFB, OFB, CBC
 } ENC_MODE;
 
-char * encrypt_buffer(char * buffer, ENC_TYPE type, ENC_MODE mode, char * password);
-char * decrypt_buffer(char * buffer, ENC_TYPE type, ENC_MODE mode, char * password);
+char * encrypt_buffer(char * buffer, int buffer_size, ENC_TYPE type, ENC_MODE mode, char * password);
+char * decrypt_buffer(char * buffer, int buffer_size, ENC_TYPE type, ENC_MODE mode, char * password);
 
 #define NON_ENC_PATH	"/tmp/.non_enc_file"
 #define ENC_PATH 		 	"/tmp/.enc_file"

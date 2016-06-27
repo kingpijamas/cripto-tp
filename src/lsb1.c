@@ -3,20 +3,20 @@
 static void hide_bit(unsigned char *buffer, int size, unsigned char data_bit);
 static unsigned char lsb(unsigned char * buffer, int buffer_bytes);
 static int recover_bytes(char * data, FILE * vector, unsigned short int sample_bytes, unsigned int bytes_to_read);
-// static void print_bits(unsigned char num);
-//
-// void print_bits(unsigned char num){
-//     unsigned char size = sizeof(unsigned char);
-//     unsigned char maxPow = 1 << (size * 8 - 1);
-//
-//     printf("'");
-//     for(unsigned int i=0; i < size * 8; i++){
-//       // print last bit and shift left.
-//       printf("%u", (num & maxPow) ? 1 : 0);
-//       num <<= 1;
-//     }
-//     printf("'");
-// }
+static void print_bits(unsigned char num);
+
+void print_bits(unsigned char num){
+    unsigned char size = sizeof(unsigned char);
+    unsigned char maxPow = 1 << (size * 8 - 1);
+
+    printf("'");
+    for(unsigned int i=0; i < size * 8; i++){
+      // print last bit and shift left.
+      printf("%u", (num & maxPow) ? 1 : 0);
+      num <<= 1;
+    }
+    printf("'");
+}
 
 void hide_lsb1(FILE * vector, FILE * orig_file, unsigned short int sample_bytes, char * data, unsigned int bytes_to_hide) { // TODO: unsigned long
   int input_bytes_read = 0;
@@ -50,12 +50,26 @@ void hide_bit(unsigned char * buffer, int buffer_size, unsigned char data_bit){
 int recover_lsb1(char * out_path, FILE * vector, unsigned short int sample_bytes, bool ext){
     // load body size
     DWORD data_size = 0;
-    int bytes_recovered = recover_bytes((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
+    recover_bytes((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
     data_size = __builtin_bswap64(data_size);
+
+    // printf("----SIZE----");
+  	// for (int i=0; i<sizeof(DWORD); i++) {
+  	// 	printf("\n");
+  	// 	print_bits(((char *) &data_size)[i]);
+  	// }
+  	// printf("\n----SIZE----(%lu)\n", data_size);
 
     // load body
     char * data = (char *) calloc(data_size, sizeof(char));
-    bytes_recovered += recover_bytes(data, vector, sample_bytes, data_size);
+    recover_bytes(data, vector, sample_bytes, data_size);
+
+    // printf("----PAYLOAD SENT----");
+  	// for (int i=0; i<data_size; i++) {
+  	// 	printf("\n");
+  	// 	print_bits(data[i]);
+  	// }
+  	// printf("\n----PAYLOAD SENT----\n\n");
 
     // load extension
     char extension[MAX_EXT_LEN + 1] = { '\0' };
@@ -71,7 +85,7 @@ int recover_lsb1(char * out_path, FILE * vector, unsigned short int sample_bytes
     }
 
     // save all to new file
-    create_file(out_path, extension, data, data_size);
+    int bytes_recovered = create_file(out_path, extension, data, data_size);
     free(data);
     return bytes_recovered;
 }
