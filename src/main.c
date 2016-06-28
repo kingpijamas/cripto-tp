@@ -18,12 +18,10 @@ static void embed(char * in_path, char * p_path, char * out_path, char * steg_ty
 		ENC_MODE enc_mode);
 
 int main(int argc, char **argv) {
-	printf("Antes del help\n");
 	if (argc == 1 || (streq(argv[1], "-h") || streq(argv[1], "--help"))) {
 		print_help();
 		return SYS_OK;
 	}
-	printf("dps del help\n");
 
 	comm command = NO_COMMAND;
 	char * in_path = NULL;	//archivo que se va a ocultar
@@ -52,7 +50,6 @@ int main(int argc, char **argv) {
 			command = ANALYZE;
 			break;
 		when(IN_ARG)
-			printf("In\n");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -61,7 +58,6 @@ int main(int argc, char **argv) {
 			in_path = param;
 			break;
 		when(P_ARG)
-			printf("P arg\n");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -71,7 +67,6 @@ int main(int argc, char **argv) {
 			p_path = param;
 			break;
 		when(OUT_ARG)
-			printf("Out arg\n");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -82,7 +77,6 @@ int main(int argc, char **argv) {
 			out_path = param;
 			break;
 		when(STEG_ARG)
-			printf("Steg arg\n");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -94,21 +88,18 @@ int main(int argc, char **argv) {
 			steg_type = param;
 			break;
 		when(A_ARG)
-			printf("A arg\n");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
 			enc_type = parse_enc_type(argv[index]);
 			break;
 		when(M_ARG)
-			printf("M arg\n");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
 			enc_mode = parse_enc_mode(argv[index]);
 			break;
 		when(PASS_ARG)
-			printf("Pass Arg\n");
 			if (++index >= argc) {
 				fail(INC_PARAMC, NULL);
 			}
@@ -123,15 +114,12 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	printf("Command es %d ", command);
 	if (command == NO_COMMAND) {
 		fail(INVALID_OP, NULL);
 	}
-	printf("\nParameters OK!\n");
 
 	switch (command) {
 	when(EMBED)
-		printf("Embed entered\n");
 		embed(in_path, p_path, out_path, steg_type, password, enc_type, enc_mode);
 		return SYS_OK;
 	when(EXTRACT)
@@ -150,8 +138,6 @@ int main(int argc, char **argv) {
 
 void embed(char * in_path, char * p_path, char * out_path, char * steg_type, char * password, ENC_TYPE enc_type,
 		ENC_MODE enc_mode) {
-	printf("\n\nEMBED\n");
-
 	if (empty(in_path)) {
 		fail(INVALID_OP, NULL);
 	}
@@ -165,12 +151,10 @@ void embed(char * in_path, char * p_path, char * out_path, char * steg_type, cha
 
 	char * marshalled_data = (char *) calloc(1, sizeof(char *));
 	int marshalled_size = marshall_plain(in_path, &marshalled_data);
-	printf("path: %s\nmarshalled_size (DEC): %d\n", in_path, marshalled_size);
 
 	if (encrypt) {
 		in_path = encrypt_buffer(marshalled_data, marshalled_size, enc_type, enc_mode, password);
 		marshalled_size = marshall_encrypted(in_path, &marshalled_data);
-		printf("path: %s\nmarshalled_size (CYP): %d\n", in_path, marshalled_size);
 	}
 
 	FILE * vector = fopen(p_path, "rb");
@@ -194,7 +178,6 @@ void embed(char * in_path, char * p_path, char * out_path, char * steg_type, cha
 }
 
 void extract(char * p_path, char * out_path, char * steg_type, char * password, ENC_TYPE enc_type, ENC_MODE enc_mode) {
-	printf("\n\nEXTRACT\n");
 
 	if (empty(p_path) || empty(out_path) || empty(steg_type)) {
 		fail(INVALID_OP, NULL);

@@ -23,7 +23,6 @@ int create_file(char * base_path, char * extension, char * data, int data_size) 
 
 	FILE * data_file = fopen(filename, "wb+");
 	int bytes_written = fwrite(data, 1, data_size, data_file);
-	printf("bytes_written: %d\n", bytes_written);
 
 	free(filename);
 	fclose(data_file);

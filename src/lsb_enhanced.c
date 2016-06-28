@@ -47,7 +47,6 @@ int recover_lsb_enh(char * out_path, FILE * vector, unsigned short int sample_by
 	DWORD data_size = 0;
 	recover_bytes_enh((char *) &data_size, vector, sample_bytes, sizeof(DWORD));
 	data_size = __builtin_bswap32(data_size);
-	printf("LSBE Data size: %d", data_size);
 	char * data = (char *) calloc(data_size, sizeof(char));
 	recover_bytes_enh(data, vector, sample_bytes, data_size);
 	char extension[MAX_EXT_LEN + 1] = { '\0' };
